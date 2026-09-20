@@ -147,6 +147,8 @@ class Observer:
                 progressed = True
             elif name.startswith(("make_", "place_")) and not progressed:
                 self._log(name.replace("_", " ") + " failed")
+            elif name == "do" and target == "downed_ally":
+                self._log("revived a teammate")             # nothing of the reviver's own changes, but it worked
             elif name == "do" and not progressed and ci == pi and target not in ("water", "grass"):
                 self._log("do on %s had no effect" % target)
             elif name.startswith("move_") and cur["pos"] == prev["pos"] and target_blocked(prev, name):

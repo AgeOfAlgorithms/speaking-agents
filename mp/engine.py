@@ -130,6 +130,7 @@ class MPPlayer(objects.Player):
         super().__init__(world, pos)
         self.pid, self.name, self.alive = pid, name, True
         self.downed = 0                                    # steps left before a downed player dies
+        self.revived_by = None                             # name of the teammate who just revived this player
         self.bucket_water = {k: 0 for k in BUCKETS}
         for k in BUCKETS:
             self.achievements["make_" + k] = 0             # not part of Crafter's 22, tracked separately
@@ -271,6 +272,7 @@ class MPPlayer(objects.Player):
                 for k in ("food", "drink", "energy"):
                     obj.inventory[k] = max(obj.inventory[k], 3)
                 obj._last_health = obj.health
+                obj.revived_by = self.name
                 self.stats["revives"] += 1
         else:
             super()._do_object(obj)
@@ -368,11 +370,18 @@ class MPObserver(Observer):
 
     def __init__(self, world, player, players, **kw):
         self.heard_now, self.comms, self._players = [], [], players
+        self._down_logged = False
         super().__init__(_View(world, player), **kw)
 
     def _build(self, action):
-        P = super()._build(action)
         me = self.env._player
+        if me.downed and not self._down_logged:
+            self._log("you went down")
+        self._down_logged = bool(me.downed)
+        if me.revived_by:
+            self._log("%s revived you" % me.revived_by)
+            me.revived_by = None
+        P = super()._build(action)
         P.update(name=me.name, heard=list(self.heard_now), downed=me.downed,
                  teammates=[q.name for q in self._players if q is not me and q.alive],
                  bucket_water={k: me.bucket_water[k] for k in BUCKETS if me.inventory[k]})
