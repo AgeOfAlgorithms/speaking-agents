@@ -327,7 +327,18 @@ async function pollTraining() {
   if (pl && !t.runs.length) card.append(el('h2', {}, el('span', { class:'dot' }), `Pipeline — step ${pl.step} of ${pl.of}: ${pl.stage} `, el('small', { text:'training curves appear here when the training step starts' })),
     el('p', { class:'note', style:'margin:0', text: pl.detail || 'starting…' }));
   const css = getComputedStyle(document.documentElement), c1 = css.getPropertyValue('--s1').trim(), c2 = css.getPropertyValue('--s2').trim(), c3 = css.getPropertyValue('--s3').trim();
-  t.runs.forEach(r => { const last = r.points[r.points.length - 1], pct = last && r.total ? last.step / r.total * 100 : 0;
+  t.runs.filter(r => r.rl.length).forEach(r => { const last = r.rl[r.rl.length - 1], pct = last.step / r.total * 100, pts = k => r.rl.map(p => ({ step:p.step, y:p[k] }));
+    card.append(el('h2', {}, el('span', { class:'dot' }), `Training: ${r.name} `, el('small', { text:r.mode })),
+      el('div', { class:'progress' }, el('i', { style:`width:${pct}%` })),
+      el('p', { class:'note', style:'margin:6px 0 0', text:`iteration ${last.step} of ${r.total} (${pct.toFixed(0)}%) · about ${r.min_left} min left · ${last.decisions} decisions per iteration, ${last.min_per_iter} min each · last update ${r.age_s}s ago` }),
+      el('div', { class:'charts' },
+        el('div', {}, el('div', { class:'legend' }, el('span', {}, el('i', { style:`background:${c1}` }), 'team achievements per finished game (last 40 training games)')),
+          lineChart([{ name:'achievements', color:c1, pts:pts('achievements') }], { fmt:v => v.toFixed(1) })),
+        el('div', {}, el('div', { class:'legend' }, el('span', {}, el('i', { style:`background:${c1}` }), 'share of turns spent speaking')),
+          lineChart([{ name:'speaks', color:c1, pts:pts('speaks') }], { fmt:v => v.toFixed(1) + '%' })),
+        el('div', {}, el('div', { class:'legend' }, el('span', {}, el('i', { style:`background:${c1}` }), 'game length, steps')),
+          lineChart([{ name:'length', color:c1, pts:pts('length') }], { fmt:v => v.toFixed(0) })))); });
+  t.runs.filter(r => !r.rl.length).forEach(r => { const last = r.points[r.points.length - 1], pct = last && r.total ? last.step / r.total * 100 : 0;
     card.append(el('h2', {}, el('span', { class:'dot' }), `Training: ${r.name} `, el('small', { text:r.mode })),
       el('div', { class:'progress' }, el('i', { style:`width:${pct}%` })),
       el('p', { class:'note', style:'margin:6px 0 0', text: last ? `step ${last.step} of ${r.total} (${pct.toFixed(0)}%) · about ${r.min_left} min left · ${Math.round(r.speed)} tokens/s · last update ${r.age_s}s ago` : 'starting: loading the model and preparing the data…' }),

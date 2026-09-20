@@ -48,6 +48,14 @@ class TeamPolicy(nn.Module):
         self.out = nn.Sequential(nn.Linear(dec_dim + d, d), nn.GELU(), nn.LayerNorm(d))
         self.word_bias = nn.Parameter(torch.zeros(len(WORDS)))
         self.scale = nn.Parameter(torch.tensor(10.0))
+        # state value, for RL (mp/train_rl.py). The pooled vector is large and un-normalised, so it is
+        # normalised first; without that one update sends the value estimates into the thousands.
+        self.value_head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 1))
+        nn.init.zeros_(self.value_head[-1].weight)
+        nn.init.zeros_(self.value_head[-1].bias)
+
+    def value(self, h):
+        return self.value_head(h[:, 0].float()).squeeze(-1)
 
     # -- shared encoder pass ---------------------------------------------------------------------
     def encode(self, input_ids, attention_mask, marker_pos, marker_mask):
@@ -99,9 +107,17 @@ class TeamPolicy(nn.Module):
             prev = table.float()[torch.arange(h.size(0)), targets[:, t].clamp(min=0)]
         return torch.stack(out, 1)
 
+    def sentence_logp(self, h, attention_mask, name_tok, name_tok_mask, tokens):
+        """Log-probability of each sampled sentence. tokens [B, T]: word indices exactly as `speak` drew them
+        (including the <end> it stopped on, if it did), padded with -100."""
+        logits = self.speech_logits(h, attention_mask, name_tok, name_tok_mask, tokens.clamp(min=0))
+        logp = torch.log_softmax(logits, -1).gather(-1, tokens.clamp(min=0)[..., None]).squeeze(-1)
+        return (logp * (tokens != -100)).sum(-1)
+
     @torch.no_grad()
-    def speak(self, h, attention_mask, name_tok, name_tok_mask, sample=True, temperature=1.0):
-        """-> list of word-index lists (without <end>), and the summed log-probability of each sentence."""
+    def speak(self, h, attention_mask, name_tok, name_tok_mask, sample=True, temperature=1.0, return_tokens=False):
+        """-> list of word-index lists (without <end>), and the summed log-probability of each sentence.
+        With return_tokens, also the exact token lists drawn (with <end>), which sentence_logp can re-score."""
         table, valid = self.vocabulary(name_tok, name_tok_mask)
         pad = ~attention_mask.bool()
         b = h.size(0)
@@ -109,19 +125,22 @@ class TeamPolicy(nn.Module):
         prev = self.start_emb[None].expand(b, -1).float()
         alive = torch.ones(b, dtype=torch.bool, device=h.device)
         words, logp = [[] for _ in range(b)], torch.zeros(b, device=h.device)
+        drawn = [[] for _ in range(b)]
         for _ in range(MAX_WORDS + 1):
             logits, state = self._step(prev, state, h.float(), pad, table.float(), valid)
             dist = torch.distributions.Categorical(logits=logits / temperature)
             w = dist.sample() if sample else logits.argmax(-1)
             logp = logp + dist.log_prob(w) * alive
             for i in range(b):
+                if alive[i]:
+                    drawn[i].append(int(w[i]))
                 if alive[i] and w[i] != 0 and len(words[i]) < MAX_WORDS:
                     words[i].append(int(w[i]))
             alive = alive & (w != 0)
             if not alive.any():
                 break
             prev = table.float()[torch.arange(b), w]
-        return words, logp
+        return (words, logp, drawn) if return_tokens else (words, logp)
 
     # -- names ---------------------------------------------------------------------------------------
     def name_tokens(self, names_per_sample, device):

@@ -21,6 +21,8 @@ from mp.session import Session, describe  # noqa: E402
 GAME = {"session": None}
 ROOT = os.path.dirname(HERE)
 STEP_RE = re.compile(r"^step\s+(\d+)/(\d+) \| loss ([\d.]+) \| train acc ([\d.]+) \| ([\d.]+) tok/s \| (\d+) min left(?: \| speech loss ([\d.]+))?")
+ITER_RE = re.compile(r"^iter\s+(\d+)/(\d+) \| reward/decision (-?[\d.]+) \| team achievements ([\d.]+) \| game length (\d+) \| "
+                     r"speaks ([\d.]+)% \| kl (-?[\d.]+).*?\| (\d+) decisions \| ([\d.]+) min/iter.*?\| (\d+) min left")
 VAL_RE = re.compile(r"^\s+val acc ([\d.]+)(?: \| speech: words ([\d.]+), whole sentences ([\d.]+))?")
 
 
@@ -35,8 +37,15 @@ def training():
         age = time.time() - os.path.getmtime(path)
         if age > 300 or "saved to" in text or "Traceback" in text:
             continue
-        points, vals, total, left, speed = [], [], None, None, None
+        points, vals, total, left, speed, rl = [], [], None, None, None, []
         for line in text.splitlines():
+            r = ITER_RE.match(line)
+            if r:
+                total, left = int(r.group(2)), int(r.group(10))
+                rl.append({"step": int(r.group(1)), "reward": float(r.group(3)), "achievements": float(r.group(4)),
+                           "length": int(r.group(5)), "speaks": float(r.group(6)), "kl": float(r.group(7)),
+                           "decisions": int(r.group(8)), "min_per_iter": float(r.group(9))})
+                continue
             m = STEP_RE.match(line)
             if m:
                 total, left, speed = int(m.group(2)), int(m.group(6)), float(m.group(5))
@@ -49,15 +58,18 @@ def training():
                              "words": float(v.group(2)) if v.group(2) else None,
                              "sentences": float(v.group(3)) if v.group(3) else None})
         mode = re.search(r"training mode (\S+): ([\d.]+)M trainable", text)
+        rl_head = re.search(r"^RL from (\S+) \| (\S+) \| speech (on|off)", text, re.M)
         runs.append({"name": os.path.basename(path)[len("logs_train_"):-4], "age_s": round(age), "total": total, "min_left": left,
-                     "speed": speed, "points": points, "val": vals,
-                     "mode": "%s (%sM trainable parameters)" % (mode.group(1), mode.group(2)) if mode else ""})
+                     "speed": speed, "points": points, "val": vals, "rl": rl,
+                     "mode": ("reinforcement learning from %s, speech %s" % (rl_head.group(1), rl_head.group(3)) if rl_head else
+                              "%s (%sM trainable parameters)" % (mode.group(1), mode.group(2)) if mode else "")})
     return {"runs": runs, "pipeline": pipeline_status()}
 
 
 STAGES = {"mp.run_baselines": ("Scoring the baseline teams", "logs_baselines.txt"),
           "mp.collect": ("Recording warm-start data from the scripted team", "logs_collect.txt"),
           "mp.train_bc": ("Training Laya", "logs_train_team_bc.txt"),
+          "mp.train_rl": ("Reinforcement learning", "logs_train_rl.txt"),
           "mp.evaluate": ("Evaluating the trained team on held-out worlds", "logs_eval_trained.txt")}
 
 
