@@ -1,5 +1,9 @@
 """Warm start: teach the team player (mp/model.py) to do what the scripted co-op team does.
 
+A checkpoint is written to <out>/checkpoint every --save-every steps; add --resume to pick an
+interrupted run up from there (same data order, learning-rate schedule restored; the optimiser's
+moment estimates start fresh, which costs a few dozen steps of re-warming, not the run).
+
     python -m mp.train_bc --out models/team_bc                       # full fine-tune from Laya
     python -m mp.train_bc --train top8 --out models/team_bc_top8     # only the top 8 encoder layers
     python -m mp.train_bc --train frozen --out models/team_bc_frozen # encoder frozen
@@ -68,6 +72,8 @@ def main():
     ap.add_argument("--lr-speech", type=float, default=5e-4)
     ap.add_argument("--max-len", type=int, default=1280)
     ap.add_argument("--head-max-len", type=int, default=640)
+    ap.add_argument("--save-every", type=int, default=1000, help="write a checkpoint to <out>/checkpoint every N steps")
+    ap.add_argument("--resume", action="store_true", help="continue from <out>/checkpoint if there is one")
     args = ap.parse_args()
 
     from laya.common import build_sequence
@@ -76,6 +82,13 @@ def main():
     agent = load_core(args)
     tok, dev = agent.tok, agent.device
     policy = TeamPolicy(agent.model, tok).to(dev)
+    ckpt_dir, start_step = os.path.join(args.out, "checkpoint"), 0
+    if args.resume and os.path.exists(os.path.join(ckpt_dir, "progress.json")):
+        from safetensors.torch import load_file
+        policy.core.load_state_dict({k: v.float() for k, v in load_file(os.path.join(ckpt_dir, "model.safetensors")).items()})
+        policy.load_speech(ckpt_dir)
+        start_step = json.load(open(os.path.join(ckpt_dir, "progress.json")))["step"]
+        print("resumed from %s at step %d" % (ckpt_dir, start_step), flush=True)
     set_trainable(policy, args.train)
 
     rows = [json.loads(line) for line in open(os.path.join(args.data, "samples.jsonl"), encoding="utf-8")]
@@ -173,16 +186,22 @@ def main():
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda u: min(1.0, (u + 1) / warm) * (0.04 + 0.96 * 0.5 * (1 + np.cos(np.pi * min(1.0, u / updates)))))
 
     print("training: %d samples, %.2f epochs, %d optimiser updates" % (n_train, args.epochs, updates), flush=True)
-    step, t0, run, tokens, done = 0, time.time(), np.zeros(3), 0, False
+    step, t0, run, tokens, done, seen = 0, time.time(), np.zeros(3), 0, False, 0
+    for _ in range(start_step // args.accum):
+        sched.step()                                   # put the learning-rate schedule where it was
     while not done:
-        order = np.random.permutation(n_train)
+        order = np.random.permutation(n_train)         # seeded above, so a resumed run sees the same order
         for i in range(0, n_train, args.bs):
+            if step < start_step:                      # already trained on this batch before the interruption
+                step += 1
+                continue
             b = batch(order[i:i + args.bs])
             act_loss, sp_loss, logits, _ = losses(b)
             ((act_loss + sp_loss) / args.accum).backward()
             step += 1
             tokens += int(b[1].sum())
-            run += (float(act_loss), float(sp_loss), float((logits.argmax(-1) == b[4]).float().mean()))
+            run += (float(act_loss.detach()), float(sp_loss.detach()), float((logits.argmax(-1) == b[4]).float().mean()))
+            seen += 1
             if step % args.accum == 0:
                 torch.nn.utils.clip_grad_norm_([p for p in policy.parameters() if p.requires_grad], 1.0)
                 opt.step()
@@ -191,8 +210,17 @@ def main():
             if step % 100 == 0:
                 el = time.time() - t0
                 print("step %5d/%d | loss %.3f | train acc %.3f | %.0f tok/s | %.0f min left | speech loss %.3f" % (
-                    step, max_steps, run[0] / 100, run[2] / 100, tokens / el, (max_steps - step) * el / step / 60, run[1] / 100), flush=True)
+                    step, max_steps, run[0] / max(1, seen), run[2] / max(1, seen), tokens / el,
+                    (max_steps - step) * el / max(1, step - start_step) / 60, run[1] / max(1, seen)), flush=True)
                 run[:] = 0
+                seen = 0
+            if step % args.save_every == 0 and step < max_steps:
+                policy.eval()
+                policy.save(ckpt_dir, agent.cfg, {"max_len": args.max_len, "head_max_len": args.head_max_len})
+                with open(os.path.join(ckpt_dir, "progress.json"), "w") as f:
+                    json.dump({"step": step, "of": max_steps, "args": vars(args)}, f)
+                policy.train()
+                print("  checkpoint saved at step %d" % step, flush=True)
             if step % 1000 == 0:
                 acc, wacc, sacc, n = evaluate()
                 print("  val acc %.3f | speech: words %.3f, whole sentences %.3f (%d spoken)" % (acc, wacc, sacc, n), flush=True)
