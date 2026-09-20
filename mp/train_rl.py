@@ -53,6 +53,8 @@ def main():
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seed0", type=int, default=2000, help="training worlds; evaluation uses seeds >= 10000")
     args = ap.parse_args()
+    if torch.cuda.is_available():
+        torch.cuda.set_per_process_memory_fraction(0.8)      # see --gpu-share in mp/train_bc.py
 
     import laya
     from laya.common import build_sequence

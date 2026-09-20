@@ -75,7 +75,11 @@ def main():
     ap.add_argument("--head-max-len", type=int, default=640)
     ap.add_argument("--save-every", type=int, default=1000, help="write a checkpoint to <out>/checkpoint every N steps")
     ap.add_argument("--resume", action="store_true", help="continue from <out>/checkpoint if there is one")
+    ap.add_argument("--gpu-share", type=float, default=0.8, help="most of the card PyTorch may hold. On Windows a process that "
+                    "outgrows free VRAM is silently moved to system memory and runs ~10x slower; capped, PyTorch frees its cache instead")
     args = ap.parse_args()
+    if torch.cuda.is_available():
+        torch.cuda.set_per_process_memory_fraction(args.gpu_share)
 
     from laya.common import build_sequence
     torch.manual_seed(0)
@@ -199,8 +203,14 @@ def main():
                 step += 1
                 continue
             b = batch(order[i:i + args.bs])
-            act_loss, sp_loss, logits, _ = losses(b)
-            ((act_loss + sp_loss) / args.accum).backward()
+            try:
+                act_loss, sp_loss, logits, _ = losses(b)
+                ((act_loss + sp_loss) / args.accum).backward()
+            except torch.cuda.OutOfMemoryError:            # hit the cap with a fragmented cache: clear it and go again
+                act_loss = sp_loss = logits = None
+                torch.cuda.empty_cache()
+                act_loss, sp_loss, logits, _ = losses(b)
+                ((act_loss + sp_loss) / args.accum).backward()
             step += 1
             tokens += int(b[1].sum())
             run += (float(act_loss.detach()), float(sp_loss.detach()), float((logits.argmax(-1) == b[4]).float().mean()))
