@@ -4,9 +4,20 @@
     python -m mp.train_rl --model models/team_bc --out models/team_rl_mute --no-speech     # ablation: no channel
 
 PPO. Every player in every game is the same network; each decision (an action, or "speak" plus a sentence)
-is one sample. The reward a player gets for a step is the TEAM's reward for that step (+1 the first time
-anyone on the team unlocks an achievement, plus the team's mean health change), minus a little when that
-player itself goes down. A sentence's log-probability is part of the decision's log-probability, so
+is one sample. Two reward schemes (--reward):
+
+  team    the TEAM's reward for the step to everyone: +1 the first time anyone on the team unlocks an
+          achievement, plus the team's mean health change; minus --down-penalty to a player who goes down.
+  local   "you are paid for what you could have known about":
+            +1 per new team achievement (still shared: it is the team's goal)
+            your OWN health change, plus the mean health change of the teammates you can SEE (a teammate
+              mauled out of sight is noise to you; one mauled in front of you is your business)
+            + --alive-bonus per step you are standing (achievements run out; surviving the night should pay)
+            + --near-bonus per step a standing teammate is within earshot (keeps the channel usable without
+              paying for its use)
+            + --heard-bonus per step you hear a teammate (0 by default: paying for speech itself invites
+              chatter and muddies the question of whether speech is USEFUL)
+            - --down-penalty when you go down A sentence's log-probability is part of the decision's log-probability, so
 speech is reinforced exactly as actions are -- and since speaking costs the turn, chatter has to pay.
 
 Two additions to plain PPO, both switchable:
@@ -29,6 +40,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+import core
 from mp import prompts
 from mp.engine import MPEnv, state_dict
 from mp.model import TeamPolicy
@@ -55,6 +67,10 @@ def main():
     ap.add_argument("--entropy", type=float, default=0.01)
     ap.add_argument("--max-kl", type=float, default=0.05, help="stop an update early once the policy has moved this far")
     ap.add_argument("--down-penalty", type=float, default=0.5)
+    ap.add_argument("--reward", default="team", choices=["team", "local"])
+    ap.add_argument("--alive-bonus", type=float, default=0.01)
+    ap.add_argument("--near-bonus", type=float, default=0.002)
+    ap.add_argument("--heard-bonus", type=float, default=0.0)
     ap.add_argument("--kl-anchor", type=float, default=0.05)
     ap.add_argument("--critic", default="team", choices=["team", "own"])
     ap.add_argument("--no-speech", action="store_true")
@@ -83,8 +99,8 @@ def main():
     set_trainable(policy, args.train)
     policy.eval()                                           # no dropout: old and new log-probabilities must be comparable
     amp = dict(device_type=dev.type, dtype=torch.bfloat16, enabled=dev.type == "cuda")
-    print("RL from %s | %s | speech %s | starting at iteration %d | critic %s | anchor %g" % (
-        source, args.train, "off" if args.no_speech else "on", start_iter, args.critic, args.kl_anchor), flush=True)
+    print("RL from %s | %s | speech %s | starting at iteration %d | critic %s | anchor %g | reward %s" % (
+        source, args.train, "off" if args.no_speech else "on", start_iter, args.critic, args.kl_anchor, args.reward), flush=True)
     ref = None
     if args.kl_anchor > 0:                                  # the warm start itself, frozen (not the checkpoint being resumed)
         ref_path = args.model if os.path.isabs(args.model) else os.path.join(root, args.model)
@@ -130,6 +146,21 @@ def main():
         return {"ids": ids, "markers": markers, "offered": offered, "names": [P["name"]] + P["teammates"]}
 
     next_seed = [args.seed0 + start_iter * args.games]
+
+    def reward_for(env, info, i):
+        if args.reward == "team":
+            return info["team_reward"]
+        me, dh = env.players[i], info["health_change"]
+        mates = [q for q in env.players if q is not me and q.alive]
+        seen = [dh.get(q.pid, 0.0) for q in mates if abs(q.pos[0] - me.pos[0]) <= core.CX and abs(q.pos[1] - me.pos[1]) <= core.CY]
+        r = len(info["new_team_achievements"]) + dh.get(me.pid, 0.0) + (float(np.mean(seen)) if seen else 0.0)
+        if me.alive and not me.downed:
+            r += args.alive_bonus
+            if any(not q.downed and env.can_hear(me.pos, q.pos) for q in mates):
+                r += args.near_bonus
+            if args.heard_bonus and env.observers[i].heard_now:
+                r += args.heard_bonus
+        return r
 
     def new_game():
         env = MPEnv(n_players=args.players, seed=next_seed[0])
@@ -215,7 +246,7 @@ def main():
                     tr = G["pending"][i]
                     if tr is None:
                         continue
-                    tr["reward"] += info["team_reward"]
+                    tr["reward"] += reward_for(env, info, i)
                     if p.downed and not G["was_down"][i]:
                         tr["reward"] -= args.down_penalty
                     G["was_down"][i] = bool(p.downed)

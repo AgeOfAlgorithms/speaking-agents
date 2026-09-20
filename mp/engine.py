@@ -556,7 +556,7 @@ class MPEnv:
                 if q is not p and q.alive and self.can_hear(q.pos, p.pos):
                     self.observers[q.pid].hear(p.name, text, tuple(int(v) for v in (p.pos - q.pos)))
 
-        rewards, health_change, new_team, events = {}, [], set(), []
+        rewards, health_change, new_team, events, health_by_player = {}, [], set(), [], {}
         for p in present:
             if p.alive and not p.downed and p.health <= 0:       # knocked down this step
                 p.downed, p.sleeping = self.downed_steps, False
@@ -569,6 +569,7 @@ class MPEnv:
             new_team |= got - self.team_unlocked
             rewards[p.pid] = dh + len(got)
             health_change.append(dh)
+            health_by_player[p.pid] = dh
             if not p.alive:                                       # bled out
                 self._world.remove(p)
                 events.append("%s died" % p.name)
@@ -584,7 +585,7 @@ class MPEnv:
             else:
                 percepts.append(ob.percept)
         done = not any(p.standing for p in self.players) or self._step >= self._length
-        info = {"reward": rewards, "team_reward": team_reward, "new_team_achievements": sorted(new_team),
+        info = {"reward": rewards, "team_reward": team_reward, "new_team_achievements": sorted(new_team), "health_change": health_by_player,
                 "alive": [p.alive for p in self.players], "speech": dict(self.last_speech), "events": events}
         return self._annotate(percepts), info, done
 
