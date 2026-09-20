@@ -168,7 +168,9 @@ class ScriptedAgent:
                 del self.told[t]
         if told:
             P = dict(P, remembered={**P["remembered"], **told})
-        if inv["wood_pickaxe"]:                                      # once the basics exist, reserve 3 stone + 4 wood for the fire
+        basics = inv["wood_pickaxe"] and inv["wood_sword"] and inv["stone_pickaxe"] and inv["stone_sword"]
+        if basics or (inv["wood_pickaxe"] and falling and light < 0.97):   # mornings are for tools; hold fire-makings back
+                                                                        # only once the basic tools exist or evening is near
             P = dict(P, inv={**inv, "stone": max(0, inv["stone"] - 3), "wood": max(0, inv["wood"] - (4 if has_bucket else 6))})
         return ACTIONS[self.teacher.act(P)], None
 
