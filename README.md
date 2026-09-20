@@ -93,6 +93,9 @@ over held-out worlds. Three players per team.
 | Laya, zero-shot (sampled / always top choice) | 1.9 / 0.0 | 2.9 / 0.0 | 184 / 212 |
 | von, zero-shot (sampled) | 1.7 | 3.9 | 175 |
 | **Laya, warm-started by imitation** (full fine-tune, 57k decisions) | **25.9** | 13.0 | 277 |
+| **the same, with a speech decoder pretrained to describe what it sees** (below) | **30.5** | 13.1 | 309 |
+| Laya, imitation with only the top 8 of 28 encoder layers trainable | 17.0 | 9.9 | 193 |
+| Laya, imitation with the encoder frozen | 6.9 | 6.9 | 188 |
 | scripted co-op, talking (the team it imitated) | 29.2 | 13.5 | 360 |
 | scripted co-op, silent | 28.1 | 13.8 | 341 |
 | scripted co-op, speech muted | 28.8 | 13.5 | 297 |
@@ -121,11 +124,34 @@ compass word or distance in "I see coal southwest pretty close". With the same a
 Twenty worlds is a small sample, but the direction is the first sign that the words do something:
 a downed player who can say "help me" properly gets picked up.
 
+**Unfreezing the encoder matters.** Held-out agreement with the scripted team / team score: whole
+encoder trainable 80% / 25.9, top 8 layers 65% / 17.0, frozen 50% / 6.9.
+
+**Speak first, understand later.** Learning to talk and to understand at the same time is a
+chicken-and-egg problem, so the two are separated. `mp/describe.py` computes, for any recorded state,
+the sentences in the agents' vocabulary that are TRUE of it ("few zombie south close by", "Pia is east
+pretty close", "I have many stone", "night soon", "I can make pickaxe"; about 15 per state), and
+`mp/pretrain_speech.py` trains the decoder on 16,000 recorded states to say them, with no game running.
+When speaking is worth a turn, and what to do about what one hears, is left to reinforcement learning.
+
+The finding that made it work: the decoder must not read the encoder's final states. After
+fine-tuning for action choice those no longer carry details like "3 west 1 north"; a decoder reading
+them became fluent but was right about the state only ~40% of the time, however it attended. Reading
+encoder layer 16 of 28 instead, the sentence it thinks most likely is true of held-out states 100% of
+the time, and sentences sampled from it 68%. (RL trains only the top 8 layers, so what the decoder
+reads cannot drift during RL.) A short mixed phase keeps the scripted team's sentences at the scripted
+team's moments: 95% of held-out words, 83% of whole sentences (67% before).
+
+With that decoder and the unchanged action policy the team scores 30.5 (25.9 before), with 2.0
+revives a game and the first shared drinks from a placed bucket. Caveats: 20 worlds; and two log fixes
+went in at the same time (a revive is now logged as one, and where a heard sentence came from is
+re-expressed from where the listener stands now), so this is not a clean single-change comparison.
+
 Honest reading of the scripted numbers: with a hand-written protocol, talking makes players live a
 little longer and lets them hand each other the makings of a stone campfire, but it does not move the
 team score. Whether a *learned* protocol does is the open question; reinforcement learning from the
-warm start (speech on vs off) is next, along with von's encoder under the same head and a study of
-how much of the encoder needs unfreezing.
+warm start (speech on vs off) is running: PPO with a KL anchor to the warm start (so speech does not
+die out before it pays) and a centralised critic. von's encoder under the same head follows.
 
 ## Credits and licences
 
