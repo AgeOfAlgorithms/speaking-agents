@@ -25,7 +25,11 @@ from mp import language
 MAX_WORDS = 8
 EXTRA_WORDS = ["yes", "no", "not", "and", "to", "at", "my", "your", "base", "night", "safe", "danger", "where", "bring",
                "back", "stay", "now", "more", "thanks"]
-WORDS = ["<end>"] + sorted({w for s in language.SLOTS for phrase in language.VOCAB[s] for w in phrase.split()} | set(EXTRA_WORDS))
+# Words added after models had been trained go HERE, at the end: a word's position is part of a saved
+# model (its bias), so the list may grow but never be re-ordered.
+LATER_WORDS = ["multiple"]
+WORDS = ["<end>"] + sorted({w for s in language.SLOTS for phrase in language.VOCAB[s] for w in phrase.split()} | set(EXTRA_WORDS)) + LATER_WORDS
+assert len(set(WORDS)) == len(WORDS)
 WORD_ID = {w: i for i, w in enumerate(WORDS)}
 MAX_NAMES = 6
 SLOW_TO_MOVE = ("log_scale", "word_bias")     # scalars/biases that need a much larger learning rate than the weights
@@ -187,6 +191,8 @@ class TeamPolicy(nn.Module):
             sd = load_file(f)
             if "scale" in sd:                                   # checkpoints written before log_scale existed
                 sd["log_scale"] = sd.pop("scale").clamp(min=1.0).log()
+            if sd["word_bias"].numel() < len(WORDS):            # saved before the newest words existed
+                sd["word_bias"] = F.pad(sd["word_bias"], (0, len(WORDS) - sd["word_bias"].numel()))
             self.load_state_dict(sd, strict=False)
             return True
         return False
