@@ -328,7 +328,8 @@ async function pollTraining() {
     el('p', { class:'note', style:'margin:0', text: pl.detail || 'starting…' }));
   const css = getComputedStyle(document.documentElement), c1 = css.getPropertyValue('--s1').trim(), c2 = css.getPropertyValue('--s2').trim(), c3 = css.getPropertyValue('--s3').trim();
   t.runs.filter(r => r.rl.length).forEach(r => { const last = r.rl[r.rl.length - 1], pct = last.step / r.total * 100, pts = k => r.rl.map(p => ({ step:p.step, y:p[k] }));
-    card.append(el('h2', {}, el('span', { class:'dot' }), `Training: ${r.name} `, el('small', { text:r.mode })),
+    card.append(el('h2', {}, el('span', { class:'dot' }), `${r.title} `, el('small', { text:r.mode })),
+      el('p', { class:'note', style:'margin:0 0 8px', text:`${r.about} (files: models/${r.name === 'rl' ? 'team_rl' : r.name})` }),
       el('div', { class:'progress' }, el('i', { style:`width:${pct}%` })),
       el('p', { class:'note', style:'margin:6px 0 0', text:`iteration ${last.step} of ${r.total} (${pct.toFixed(0)}%) · about ${r.min_left} min left · ${last.decisions} decisions per iteration, ${last.min_per_iter} min each · last update ${r.age_s}s ago` }),
       el('div', { class:'charts' },
@@ -339,7 +340,8 @@ async function pollTraining() {
         el('div', {}, el('div', { class:'legend' }, el('span', {}, el('i', { style:`background:${c1}` }), 'game length, steps')),
           lineChart([{ name:'length', color:c1, pts:pts('length') }], { fmt:v => v.toFixed(0) })))); });
   t.runs.filter(r => !r.rl.length).forEach(r => { const last = r.points[r.points.length - 1], pct = last && r.total ? last.step / r.total * 100 : 0;
-    card.append(el('h2', {}, el('span', { class:'dot' }), `Training: ${r.name} `, el('small', { text:r.mode })),
+    card.append(el('h2', {}, el('span', { class:'dot' }), `${r.title} `, el('small', { text:r.mode })),
+      el('p', { class:'note', style:'margin:0 0 8px', text:`${r.about} (files: models/${r.name === 'rl' ? 'team_rl' : r.name})` }),
       el('div', { class:'progress' }, el('i', { style:`width:${pct}%` })),
       el('p', { class:'note', style:'margin:6px 0 0', text: last ? `step ${last.step} of ${r.total} (${pct.toFixed(0)}%) · about ${r.min_left} min left · ${Math.round(r.speed)} tokens/s · last update ${r.age_s}s ago` : 'starting: loading the model and preparing the data…' }),
       el('div', { class:'charts' },

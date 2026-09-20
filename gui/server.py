@@ -26,6 +26,25 @@ ITER_RE = re.compile(r"^iter\s+(\d+)/(\d+) \| reward/decision (-?[\d.]+) \| team
 VAL_RE = re.compile(r"^\s+val acc ([\d.]+)(?: \| speech: words ([\d.]+), whole sentences ([\d.]+))?")
 
 
+IMITATION = ("Imitation warm start (\"behaviour cloning\", hence the folder name team_bc): the model is shown 57,000 recorded "
+             "decisions of the hand-scripted team and learns to pick the same action, or say the same sentence, in the same "
+             "situation. It gives reinforcement learning a team that can already play instead of one that acts at random. ")
+RUN_INFO = {
+    "team_bc": ("Laya learns to play by imitating the scripted team", IMITATION + "This run: Laya, every layer trainable."),
+    "team_bc_von": ("von's encoder learns to play by imitating the scripted team",
+                    IMITATION + "This run: the same recipe with von's pretrained encoder under Laya's one-pass head, to compare the two models at equal cost."),
+    "team_bc_top8": ("Laya imitates the scripted team, only its top 8 layers trainable",
+                     IMITATION + "This run: part of the unfreezing study. Only the top 8 of Laya's 28 encoder layers learn (about 3x cheaper); "
+                     "how much score does that give up against training everything?"),
+    "team_bc_frozen": ("Laya imitates the scripted team, encoder frozen",
+                       IMITATION + "This run: part of the unfreezing study. The pretrained encoder is left untouched; only the small heads on top learn (cheapest)."),
+    "rl": ("Reinforcement learning: the Laya team plays and is paid as a team",
+           "Three copies of the warm-started Laya play together in fresh worlds. Every decision, including whether to spend a turn speaking "
+           "and what to say, is reinforced by the TEAM's reward (each achievement counts once for the team, plus health). "
+           "This is the run that tests whether speech helps."),
+}
+
+
 def training():
     """Training runs whose log (logs_train_*.txt) was written in the last 5 minutes and has not finished."""
     runs = []
@@ -59,7 +78,9 @@ def training():
                              "sentences": float(v.group(3)) if v.group(3) else None})
         mode = re.search(r"training mode (\S+): ([\d.]+)M trainable", text)
         rl_head = re.search(r"^RL from (\S+) \| (\S+) \| speech (on|off)", text, re.M)
-        runs.append({"name": os.path.basename(path)[len("logs_train_"):-4], "age_s": round(age), "total": total, "min_left": left,
+        name = os.path.basename(path)[len("logs_train_"):-4]
+        title, about = RUN_INFO.get(name, RUN_INFO["rl"] if name.startswith("rl") else ("Training: " + name, ""))
+        runs.append({"name": name, "title": title, "about": about, "age_s": round(age), "total": total, "min_left": left,
                      "speed": speed, "points": points, "val": vals, "rl": rl,
                      "mode": ("reinforcement learning from %s, speech %s" % (rl_head.group(1), rl_head.group(3)) if rl_head else
                               "%s (%sM trainable parameters)" % (mode.group(1), mode.group(2)) if mode else "")})

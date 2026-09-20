@@ -82,7 +82,7 @@ def tune(policy, agent, rows, val_rows, epochs=25, bs=16, lr=5e-4, slow_lr=5e-3,
     t0 = time.time()
     train, val = encode(prepare(rows)), encode(prepare(val_rows))
     log("read %d spoken samples through the encoder in %.0fs" % (len(train) + len(val), time.time() - t0))
-    named = [(k, p) for k, p in policy.named_parameters() if not k.startswith(("core.", "value_head."))]
+    named = [(k, p) for k, p in policy.named_parameters() if not k.startswith(("core.", "value_head.", "value_team."))]
     params = [p for _, p in named]
     for p in params:
         p.requires_grad_(True)

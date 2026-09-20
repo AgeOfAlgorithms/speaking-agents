@@ -33,6 +33,13 @@ def save(message):
 while "overnight queue finished" not in open("logs_overnight.txt", encoding="utf-8").read():
     time.sleep(60)                                           # the GPU is still busy with the warm-start comparisons
 
+# the von-encoder warm start ran out of GPU memory in the overnight queue; train_bc now halves such batches
+run(["mp.train_bc", "--limit", "60000", "--encoder", "von", "--out", "models/team_bc_von", "--resume"], "logs_train_team_bc_von.txt",
+    skip_if="models/team_bc_von/train_report.json")
+run(["mp.evaluate", "--team", "trained", "--model", "models/team_bc_von", "--games", "20", "--tag", "von_trained"], "logs_eval_von_trained.txt",
+    skip_if="results/von_trained.json")
+save("Results: von's encoder under Laya's head, warm-started the same way")
+
 run(["mp.train_rl", "--model", "models/team_bc", "--out", "models/team_rl", "--iters", iters, "--resume"], "logs_train_rl.txt",
     skip_if="models/team_rl/train_report.json")
 run(["mp.evaluate", "--team", "trained", "--model", "models/team_rl", "--games", "20", "--tag", "laya_rl"], "logs_eval_laya_rl.txt",

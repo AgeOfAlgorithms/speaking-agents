@@ -192,6 +192,25 @@ def main():
     warm = max(1, int(0.03 * updates))
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda u: min(1.0, (u + 1) / warm) * (0.04 + 0.96 * 0.5 * (1 + np.cos(np.pi * min(1.0, u / updates)))))
 
+    def train_on(idx, share=1.0):
+        """Forward + backward on one micro-batch -> (action loss, speech loss, accuracy), tokens read.
+        A batch of unusually long states can outgrow the memory cap: it is then done as two halves."""
+        try:
+            b = batch(idx)
+            act_loss, sp_loss, logits, _ = losses(b)
+            ((act_loss + sp_loss) * share / args.accum).backward()
+            return share * np.array([float(act_loss.detach()), float(sp_loss.detach()),
+                                     float((logits.argmax(-1) == b[4]).float().mean())]), int(b[1].sum())
+        except torch.cuda.OutOfMemoryError:
+            if len(idx) == 1:
+                raise
+        b = act_loss = sp_loss = logits = None
+        torch.cuda.empty_cache()
+        half = len(idx) // 2
+        s1, t1 = train_on(idx[:half], share * half / len(idx))
+        s2, t2 = train_on(idx[half:], share * (len(idx) - half) / len(idx))
+        return s1 + s2, t1 + t2
+
     print("training: %d samples, %.2f epochs, %d optimiser updates" % (n_train, args.epochs, updates), flush=True)
     step, t0, run, tokens, done, seen = 0, time.time(), np.zeros(3), 0, False, 0
     for _ in range(start_step // args.accum):
@@ -202,18 +221,10 @@ def main():
             if step < start_step:                      # already trained on this batch before the interruption
                 step += 1
                 continue
-            b = batch(order[i:i + args.bs])
-            try:
-                act_loss, sp_loss, logits, _ = losses(b)
-                ((act_loss + sp_loss) / args.accum).backward()
-            except torch.cuda.OutOfMemoryError:            # hit the cap with a fragmented cache: clear it and go again
-                act_loss = sp_loss = logits = None
-                torch.cuda.empty_cache()
-                act_loss, sp_loss, logits, _ = losses(b)
-                ((act_loss + sp_loss) / args.accum).backward()
+            stats, n_tok = train_on(order[i:i + args.bs])
             step += 1
-            tokens += int(b[1].sum())
-            run += (float(act_loss.detach()), float(sp_loss.detach()), float((logits.argmax(-1) == b[4]).float().mean()))
+            tokens += n_tok
+            run += stats
             seen += 1
             if step % args.accum == 0:
                 torch.nn.utils.clip_grad_norm_([p for p in policy.parameters() if p.requires_grad], 1.0)

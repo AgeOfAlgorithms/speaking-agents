@@ -9,6 +9,13 @@ anyone on the team unlocks an achievement, plus the team's mean health change), 
 player itself goes down. A sentence's log-probability is part of the decision's log-probability, so
 speech is reinforced exactly as actions are -- and since speaking costs the turn, chatter has to pay.
 
+Two additions to plain PPO, both switchable:
+  --kl-anchor B   penalise drifting from the warm-start policy (actions and sentences) by B x KL. Speaking
+                  costs a turn now and pays off later, for someone else; unanchored, the first thing RL
+                  learns is to stop talking, and the inherited protocol decays. 0 = plain PPO.
+  --critic team   centralised critic (as in MAPPO): the value estimate also reads the teammates' pooled
+                  states, since the reward is the team's. `own` = each player's view only.
+
 Only the top encoder layers train by default: it halves the cost of the backward pass, which is what
 makes this feasible on one GPU. A checkpoint is written every iteration; --resume continues from it.
 """
@@ -48,6 +55,8 @@ def main():
     ap.add_argument("--entropy", type=float, default=0.01)
     ap.add_argument("--max-kl", type=float, default=0.05, help="stop an update early once the policy has moved this far")
     ap.add_argument("--down-penalty", type=float, default=0.5)
+    ap.add_argument("--kl-anchor", type=float, default=0.05)
+    ap.add_argument("--critic", default="team", choices=["team", "own"])
     ap.add_argument("--no-speech", action="store_true")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--device", default="cuda")
@@ -74,11 +83,31 @@ def main():
     set_trainable(policy, args.train)
     policy.eval()                                           # no dropout: old and new log-probabilities must be comparable
     amp = dict(device_type=dev.type, dtype=torch.bfloat16, enabled=dev.type == "cuda")
-    print("RL from %s | %s | speech %s | starting at iteration %d" % (source, args.train, "off" if args.no_speech else "on", start_iter), flush=True)
+    print("RL from %s | %s | speech %s | starting at iteration %d | critic %s | anchor %g" % (
+        source, args.train, "off" if args.no_speech else "on", start_iter, args.critic, args.kl_anchor), flush=True)
+    ref = None
+    if args.kl_anchor > 0:                                  # the warm start itself, frozen (not the checkpoint being resumed)
+        ref_path = args.model if os.path.isabs(args.model) else os.path.join(root, args.model)
+        ref = TeamPolicy(laya.load(ref_path, device=args.device).model, tok).to(dev)
+        assert ref.load_speech(ref_path)
+        ref.eval()
+        for p in ref.parameters():
+            p.requires_grad_(False)
+    central = args.critic == "team"
+
+    def team_context(cls, keys):
+        """cls [R, d]: pooled vector of every player deciding this step; keys: their (game, player).
+        -> for each, the mean over the OTHER players of the same game (zeros when alone)."""
+        ctx = torch.zeros_like(cls)
+        for r, (g, _) in enumerate(keys):
+            mates = [q for q, (g2, _) in enumerate(keys) if g2 == g and q != r]
+            if mates:
+                ctx[r] = cls[mates].mean(0)
+        return ctx
 
     enc = [p for k, p in policy.named_parameters() if k.startswith("core.encoder.") and p.requires_grad]
-    val = list(policy.value_head.parameters())
-    rest = [p for k, p in policy.named_parameters() if not k.startswith(("core.encoder.", "value_head.")) and p.requires_grad]
+    val = list(policy.value_head.parameters()) + list(policy.value_team.parameters())
+    rest = [p for k, p in policy.named_parameters() if not k.startswith(("core.encoder.", "value_head.", "value_team.")) and p.requires_grad]
     opt = torch.optim.AdamW([{"params": enc, "lr": args.lr_encoder}, {"params": rest, "lr": args.lr_head},
                              {"params": val, "lr": args.lr_value}], weight_decay=0.0)
 
@@ -124,22 +153,35 @@ def main():
                         where.append((g, i))
             acts = [dict() for _ in games]
             says = [dict() for _ in games]
+            step_trs, step_cls, step_own = [], [], []
             for c in range(0, len(rows), 48):
                 chunk, locs = rows[c:c + 48], where[c:c + 48]
                 ids, att, mpos, mmask = collate(chunk)
                 with torch.no_grad(), torch.autocast(**amp):
                     logits, h = policy.encode(ids, att, mpos, mmask)
-                    values = policy.value(h)
+                    step_own.append(policy.value(h))
+                    step_cls.append(h[:, 0].float())
+                    if ref is not None:
+                        rlogits, rh = ref.encode(ids, att, mpos, mmask)
+                        ref_logp = torch.log_softmax(rlogits.float(), -1).cpu()
                 dist = torch.distributions.Categorical(logits=logits)
                 choice = dist.sample()
                 logp = dist.log_prob(choice)
                 speakers = [k for k, r in enumerate(chunk) if r["offered"][int(choice[k])] == prompts.SPEAK]
-                tokens = {}
+                tokens, ref_speech = {}, {}
                 if speakers:
                     ntok, nmask = policy.name_tokens([chunk[k]["names"] for k in speakers], dev)
                     words, slogp, drawn = policy.speak(h[speakers], att[speakers], ntok, nmask, sample=True, return_tokens=True)
+                    if ref is not None:                     # what the warm start would have said, word by word
+                        tk = torch.zeros((len(speakers), max(len(d) for d in drawn)), dtype=torch.long, device=dev)
+                        for j, d in enumerate(drawn):
+                            tk[j, :len(d)] = torch.tensor(d)
+                        with torch.no_grad():
+                            ref_words = torch.log_softmax(ref.speech_logits(rh[speakers], att[speakers], ntok, nmask, tk), -1).cpu()
                     for j, k in enumerate(speakers):
                         tokens[k] = drawn[j]
+                        if ref is not None:
+                            ref_speech[k] = ref_words[j, :len(drawn[j])]
                         logp[k] = logp[k] + slogp[j]
                         text = policy.render(words[j], chunk[k]["names"])
                         if text:
@@ -149,13 +191,23 @@ def main():
                     a = r["offered"][int(choice[k])]
                     acts[g][i] = "noop" if a == prompts.SPEAK else a
                     tr = {"ids": r["ids"], "markers": r["markers"], "names": r["names"], "choice": int(choice[k]), "tokens": tokens.get(k),
-                          "logp": float(logp[k]), "value": float(values[k]), "reward": 0.0, "done": False, "next": None, "key": (g, i)}
+                          "logp": float(logp[k]), "value": 0.0, "reward": 0.0, "done": False, "next": None, "key": (g, i),
+                          "ref": ref_logp[k, :len(r["markers"])] if ref is not None else None, "ref_speech": ref_speech.get(k)}
+                    step_trs.append(tr)
                     prev = games[g]["pending"][i]
                     if prev is not None:
                         prev["next"] = tr
                     games[g]["pending"][i] = tr
                     buf.append(tr)
                     decisions += 1
+            if step_trs:                                    # values, once everyone deciding this step has been encoded
+                cls = torch.cat(step_cls)
+                ctx = team_context(cls, [tr["key"] for tr in step_trs])
+                with torch.no_grad():
+                    values = policy.value_team(torch.cat([cls, ctx], -1)).squeeze(-1) if central else torch.cat(step_own)
+                for tr, v, x in zip(step_trs, values, ctx):
+                    tr["value"] = float(v)
+                    tr["ctx"] = x.half().cpu() if central else None
             for g, G in enumerate(games):
                 env = G["env"]
                 G["P"], info, done = env.step(acts[g], says[g])
@@ -177,11 +229,19 @@ def main():
         # values of the states the rollout stopped in, to bootstrap unfinished trajectories
         tails = [(G["pending"][i], sequence(G["P"][i])) for G in games for i, p in enumerate(G["env"].players)
                  if G["pending"][i] is not None and p.alive]
+        tail_cls, tail_own = [], []
         for c in range(0, len(tails), 48):
             ids, att, mpos, mmask = collate([s for _, s in tails[c:c + 48]])
             with torch.no_grad(), torch.autocast(**amp):
-                v = policy.value(policy.encode(ids, att, mpos, mmask)[1])
-            for (tr, _), x in zip(tails[c:c + 48], v):
+                h = policy.encode(ids, att, mpos, mmask)[1]
+                tail_own.append(policy.value(h))
+                tail_cls.append(h[:, 0].float())
+        if tails:
+            cls = torch.cat(tail_cls)
+            with torch.no_grad():
+                v = (policy.value_team(torch.cat([cls, team_context(cls, [tr["key"] for tr, _ in tails])], -1)).squeeze(-1)
+                     if central else torch.cat(tail_own))
+            for (tr, _), x in zip(tails, v):
                 tr["bootstrap"] = float(x)
         for tr in reversed(buf):                            # GAE, walking each player's chain backwards
             nxt = tr["next"]
@@ -199,7 +259,7 @@ def main():
         adv = np.array([t["adv"] for t in buf], dtype=np.float32)
         adv = (adv - adv.mean()) / (adv.std() + 1e-6)
         order = rng.permutation(len(buf))
-        kls, vlosses, ents, stopped = [], [], [], False
+        kls, vlosses, ents, anchors, stopped = [], [], [], [], False
         opt.zero_grad(set_to_none=True)
         for b in range(0, len(order), args.bs):
             idx = order[b:b + args.bs]
@@ -210,6 +270,13 @@ def main():
             dist = torch.distributions.Categorical(logits=logits)
             choice = torch.tensor([t["choice"] for t in batch], device=dev)
             logp = dist.log_prob(choice)
+            drift = logits.new_zeros(len(batch))            # KL(policy || warm start), per decision
+            if ref is not None:
+                new = torch.log_softmax(logits, -1)
+                old_ref = torch.zeros_like(new)
+                for k, t in enumerate(batch):
+                    old_ref[k, :len(t["ref"])] = t["ref"].to(dev)
+                drift = (new.exp() * (new - old_ref)).masked_fill(~mmask, 0.0).sum(-1)
             spk = [k for k, t in enumerate(batch) if t["tokens"]]
             if spk:
                 T = max(len(batch[k]["tokens"]) for k in spk)
@@ -217,19 +284,31 @@ def main():
                 for r, k in enumerate(spk):
                     tk[r, :len(batch[k]["tokens"])] = torch.tensor(batch[k]["tokens"])
                 ntok, nmask = policy.name_tokens([batch[k]["names"] for k in spk], dev)
-                extra = policy.sentence_logp(h[spk], att[spk], ntok, nmask, tk)
-                logp = logp.index_add(0, torch.tensor(spk, device=dev), extra)
+                said = tk != -100
+                words = torch.log_softmax(policy.speech_logits(h[spk], att[spk], ntok, nmask, tk.clamp(min=0)), -1)
+                extra = (words.gather(-1, tk.clamp(min=0)[..., None]).squeeze(-1) * said).sum(-1)
+                where_spk = torch.tensor(spk, device=dev)
+                logp = logp.index_add(0, where_spk, extra)
+                if ref is not None:
+                    ref_words = torch.zeros_like(words)
+                    for r, k in enumerate(spk):
+                        ref_words[r, :len(batch[k]["ref_speech"])] = batch[k]["ref_speech"].to(dev)
+                    # a word that cannot be said (an unused name slot) has probability 0 under both
+                    per_word = (words.exp() * (words - ref_words)).masked_fill(words < -1e3, 0.0).sum(-1)
+                    drift = drift.index_add(0, where_spk, (per_word * said).sum(-1))
             old = torch.tensor([t["logp"] for t in batch], device=dev)
             a = torch.tensor(adv[idx], device=dev)
             ratio = torch.exp(logp - old)
             pg = -torch.min(ratio * a, ratio.clamp(1 - args.clip, 1 + args.clip) * a).mean()
             ret = torch.tensor([t["ret"] for t in batch], device=dev, dtype=torch.float32)
-            vloss = F.smooth_l1_loss(policy.value(h), ret)
+            team = torch.stack([t["ctx"] for t in batch]).to(dev) if central else None
+            vloss = F.smooth_l1_loss(policy.value(h, team), ret)
             ent = dist.entropy().mean()
-            ((pg + 0.5 * vloss - args.entropy * ent) / args.accum).backward()
+            ((pg + 0.5 * vloss - args.entropy * ent + args.kl_anchor * drift.mean()) / args.accum).backward()
+            anchors.append(float(drift.mean().detach()))
             kls.append(float((old - logp).mean().detach()))
-            vlosses.append(float(vloss))
-            ents.append(float(ent))
+            vlosses.append(float(vloss.detach()))
+            ents.append(float(ent.detach()))
             if (b // args.bs + 1) % args.accum == 0:
                 torch.nn.utils.clip_grad_norm_([p for p in policy.parameters() if p.requires_grad], 1.0)
                 opt.step()
@@ -244,10 +323,10 @@ def main():
         minutes = (time.time() - t0) / 60
         left = (args.iters - it - 1) * (time.time() - t_start) / (it - start_iter + 1) / 60
         print("iter %3d/%d | reward/decision %.4f | team achievements %.2f | game length %.0f | speaks %.2f%% | kl %.4f%s | "
-              "value loss %.3f | entropy %.2f | %d decisions | %.1f min/iter (play %.0fs) | %.0f min left" % (
+              "value loss %.3f | entropy %.2f | drift from warm start %.3f | %d decisions | %.1f min/iter (play %.0fs) | %.0f min left" % (
                   it + 1, args.iters, float(np.mean([t["reward"] for t in buf])), ach, length, 100.0 * spoken / max(1, decisions),
                   float(np.mean(kls)), " (stopped early)" if stopped else "", float(np.mean(vlosses)), float(np.mean(ents)),
-                  len(buf), minutes, play_s, left), flush=True)
+                  float(np.mean(anchors)), len(buf), minutes, play_s, left), flush=True)
         policy.save(ckpt, cfg, {"max_len": max_len, "head_max_len": head_max_len})
         with open(os.path.join(ckpt, "progress.json"), "w") as f:
             json.dump({"iter": it + 1, "of": args.iters, "args": vars(args),

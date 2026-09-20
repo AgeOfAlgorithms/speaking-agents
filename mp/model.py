@@ -63,9 +63,19 @@ class TeamPolicy(nn.Module):
         self.value_head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 1))
         nn.init.zeros_(self.value_head[-1].weight)
         nn.init.zeros_(self.value_head[-1].bias)
+        # centralised critic (training only): the reward is the team's, so the value estimate also reads
+        # what the teammates are looking at. Actors never see this; they still decide from their own view.
+        self.value_team = nn.Sequential(nn.LayerNorm(2 * d), nn.Linear(2 * d, 256), nn.GELU(), nn.Linear(256, 1))
+        nn.init.zeros_(self.value_team[-1].weight)
+        nn.init.zeros_(self.value_team[-1].bias)
 
-    def value(self, h):
-        return self.value_head(h[:, 0].float()).squeeze(-1)
+    def value(self, h, team=None):
+        """h: this player's hidden states. team: mean pooled vector of the teammates deciding on the same
+        step ([B, d], zeros if none) -> centralised estimate; None -> the player's own view only."""
+        own = h[:, 0].float()
+        if team is None:
+            return self.value_head(own).squeeze(-1)
+        return self.value_team(torch.cat([own, team.float()], -1)).squeeze(-1)
 
     # -- shared encoder pass ---------------------------------------------------------------------
     def encode(self, input_ids, attention_mask, marker_pos, marker_mask):
