@@ -75,7 +75,7 @@ def main():
     ap.add_argument("--head-max-len", type=int, default=640)
     ap.add_argument("--save-every", type=int, default=1000, help="write a checkpoint to <out>/checkpoint every N steps")
     ap.add_argument("--resume", action="store_true", help="continue from <out>/checkpoint if there is one")
-    ap.add_argument("--gpu-share", type=float, default=0.8, help="most of the card PyTorch may hold. On Windows a process that "
+    ap.add_argument("--gpu-share", type=float, default=0.75, help="most of the card PyTorch may hold. On Windows a process that "
                     "outgrows free VRAM is silently moved to system memory and runs ~10x slower; capped, PyTorch frees its cache instead")
     args = ap.parse_args()
     if torch.cuda.is_available():
