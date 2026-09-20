@@ -45,4 +45,10 @@ run(["mp.train_rl", "--model", "models/team_bc", "--out", "models/team_rl", "--i
 run(["mp.evaluate", "--team", "trained", "--model", "models/team_rl", "--games", "20", "--tag", "laya_rl"], "logs_eval_laya_rl.txt",
     skip_if="results/laya_rl.json")
 save("Results: Laya after reinforcement learning (team reward, speech on)")
+# the comparison the project is about: the same RL, but nobody can speak or hear
+run(["mp.train_rl", "--model", "models/team_bc", "--out", "models/team_rl_mute", "--iters", iters, "--no-speech", "--resume"],
+    "logs_train_rl_mute.txt", skip_if="models/team_rl_mute/train_report.json")
+run(["mp.evaluate", "--team", "trained", "--model", "models/team_rl_mute", "--games", "20", "--no-speech", "--tag", "laya_rl_mute"],
+    "logs_eval_laya_rl_mute.txt", skip_if="results/laya_rl_mute.json")
+save("Results: Laya after reinforcement learning with the speech channel off")
 print("rl queue finished   [%s]" % time.strftime("%H:%M"), flush=True)
