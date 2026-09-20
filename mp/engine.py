@@ -29,6 +29,7 @@ Same engine and rules as Crafter (world generation, creatures, crafting, day/nig
               three players doing the same thing does not), plus the team's mean health change.
 """
 import math
+import re
 import pathlib
 
 import imageio.v3 as imageio
@@ -365,6 +366,9 @@ class _View:
         self._world, self._player = world, player
 
 
+HEARD_AT = re.compile(r"\(@(-?\d+),(-?\d+)\)$")
+
+
 class MPObserver(Observer):
     """Per-player percepts: core's percept plus teammates, buckets and what was heard."""
 
@@ -382,6 +386,10 @@ class MPObserver(Observer):
             self._log("%s revived you" % me.revived_by)
             me.revived_by = None
         P = super()._build(action)
+        # where a sentence came from is kept as a place on the map and re-expressed from where the listener
+        # stands NOW -- as first written ("3 east 16 north" at the moment of hearing) it went stale as they walked
+        here = lambda m: "(%s)" % rel(int(m.group(1)) - int(me.pos[0]), int(m.group(2)) - int(me.pos[1]))
+        P["events"] = [(ago, HEARD_AT.sub(here, text), n) for ago, text, n in P["events"]]
         P.update(name=me.name, heard=list(self.heard_now), downed=me.downed,
                  teammates=[q.name for q in self._players if q is not me and q.alive],
                  bucket_water={k: me.bucket_water[k] for k in BUCKETS if me.inventory[k]})
@@ -395,7 +403,8 @@ class MPObserver(Observer):
         entry = {"step": now, "from": speaker, "text": text, "where": rel(*offset)}
         self.heard_now.append(entry)
         self.comms.append(entry)
-        self._log('%s said "%s" (%s)' % (speaker, text, rel(*offset)), at=now)
+        me = self.env._player
+        self._log('%s said "%s" (@%d,%d)' % (speaker, text, int(me.pos[0]) + offset[0], int(me.pos[1]) + offset[1]), at=now)
 
     def said(self, text):
         self.comms.append({"step": self.step + 1, "from": "me", "text": text, "where": "here"})
