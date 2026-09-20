@@ -22,7 +22,8 @@ import torch
 import torch.nn.functional as F
 
 from mp import prompts
-from mp.model import MAX_NAMES, TeamPolicy
+from mp.model import MAX_NAMES, TeamPolicy, SLOW_TO_MOVE
+from mp.tune_speech import tune
 
 
 def load_core(args):
@@ -91,7 +92,7 @@ def main():
         print("resumed from %s at step %d" % (ckpt_dir, start_step), flush=True)
     set_trainable(policy, args.train)
 
-    rows = [json.loads(line) for line in open(os.path.join(args.data, "samples.jsonl"), encoding="utf-8")]
+    rows = all_rows = [json.loads(line) for line in open(os.path.join(args.data, "samples.jsonl"), encoding="utf-8")]
     if args.limit:
         rows = rows[:args.limit]
     t0 = time.time()
@@ -174,8 +175,10 @@ def main():
     policy.train()
     enc = [p for k, p in policy.named_parameters() if k.startswith("core.encoder.") and p.requires_grad]
     head = [p for k, p in policy.named_parameters() if k.startswith("core.") and not k.startswith("core.encoder.")]
-    speech = [p for k, p in policy.named_parameters() if not k.startswith("core.")]
-    groups = [{"params": head, "lr": args.lr_head}, {"params": speech, "lr": args.lr_speech}]
+    speech = [p for k, p in policy.named_parameters() if not k.startswith("core.") and k not in SLOW_TO_MOVE]
+    slow = [p for k, p in policy.named_parameters() if k in SLOW_TO_MOVE]
+    groups = [{"params": head, "lr": args.lr_head}, {"params": speech, "lr": args.lr_speech},
+              {"params": slow, "lr": 0.02, "weight_decay": 0.0}]
     if enc:
         groups.append({"params": enc, "lr": args.lr_encoder})
     opt = torch.optim.AdamW(groups, weight_decay=0.01)
@@ -231,6 +234,13 @@ def main():
     acc, wacc, sacc, n = evaluate()
     print("final val acc %.3f | speech: words %.3f, whole sentences %.3f (%d spoken)" % (acc, wacc, sacc, n))
     policy.eval()
+    policy.save(args.out, agent.cfg, {"trained_with": vars(args), "max_len": args.max_len, "head_max_len": args.head_max_len})
+    # speech is ~3% of the decisions, so one pass leaves the decoder under-trained: give it its own phase
+    del opt
+    torch.cuda.empty_cache()
+    spoken = [(i, r) for i, r in enumerate(all_rows) if r["words"]]
+    wacc, sacc = tune(policy, agent, [r for i, r in spoken if not n_train <= i < len(data)], [r for i, r in spoken if n_train <= i < len(data)],
+                      max_len=args.max_len, head_max_len=args.head_max_len)
     policy.save(args.out, agent.cfg, {"trained_with": vars(args), "max_len": args.max_len, "head_max_len": args.head_max_len})
     with open(os.path.join(args.out, "train_report.json"), "w") as f:
         json.dump({"val_action_acc": acc, "val_word_acc": wacc, "val_sentence_acc": sacc, "minutes": (time.time() - t0) / 60,

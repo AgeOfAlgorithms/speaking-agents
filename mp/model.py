@@ -28,6 +28,7 @@ EXTRA_WORDS = ["yes", "no", "not", "and", "to", "at", "my", "your", "base", "nig
 WORDS = ["<end>"] + sorted({w for s in language.SLOTS for phrase in language.VOCAB[s] for w in phrase.split()} | set(EXTRA_WORDS))
 WORD_ID = {w: i for i, w in enumerate(WORDS)}
 MAX_NAMES = 6
+SLOW_TO_MOVE = ("log_scale", "word_bias")     # scalars/biases that need a much larger learning rate than the weights
 
 
 class TeamPolicy(nn.Module):
@@ -47,7 +48,9 @@ class TeamPolicy(nn.Module):
         self.gru = nn.GRUCell(dec_dim + d, dec_dim)
         self.out = nn.Sequential(nn.Linear(dec_dim + d, d), nn.GELU(), nn.LayerNorm(d))
         self.word_bias = nn.Parameter(torch.zeros(len(WORDS)))
-        self.scale = nn.Parameter(torch.tensor(10.0))
+        # sharpness of the word choice. Stored as a log and trained with its own large learning rate
+        # (SLOW_TO_MOVE below): as a plain number at the decoder's rate it never left its starting value.
+        self.log_scale = nn.Parameter(torch.tensor(3.0))
         # state value, for RL (mp/train_rl.py). The pooled vector is large and un-normalised, so it is
         # normalised first; without that one update sends the value estimates into the thousands.
         self.value_head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 1))
@@ -90,7 +93,7 @@ class TeamPolicy(nn.Module):
         ctx = torch.einsum("bl,bld->bd", att.masked_fill(pad, -1e4).softmax(-1), h.to(q.dtype))
         state = self.gru(torch.cat([self.inp(prev_emb), ctx], -1), state)
         z = self.out(torch.cat([state, ctx], -1))
-        logits = self.scale * torch.einsum("bd,bvd->bv", F.normalize(z, dim=-1), F.normalize(table.to(z.dtype), dim=-1))
+        logits = self.log_scale.exp().clamp(max=100.0) * torch.einsum("bd,bvd->bv", F.normalize(z, dim=-1), F.normalize(table.to(z.dtype), dim=-1))
         logits = logits + F.pad(self.word_bias, (0, table.size(1) - len(WORDS)))
         return logits.float().masked_fill(~valid, -1e4), state
 
@@ -181,6 +184,9 @@ class TeamPolicy(nn.Module):
     def load_speech(self, path):
         f = os.path.join(path, "speech.safetensors")
         if os.path.exists(f):
-            self.load_state_dict(load_file(f), strict=False)
+            sd = load_file(f)
+            if "scale" in sd:                                   # checkpoints written before log_scale existed
+                sd["log_scale"] = sd.pop("scale").clamp(min=1.0).log()
+            self.load_state_dict(sd, strict=False)
             return True
         return False
