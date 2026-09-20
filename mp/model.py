@@ -27,7 +27,7 @@ EXTRA_WORDS = ["yes", "no", "not", "and", "to", "at", "my", "your", "base", "nig
                "back", "stay", "now", "more", "thanks"]
 # Words added after models had been trained go HERE, at the end: a word's position is part of a saved
 # model (its bias), so the list may grow but never be re-ordered.
-LATER_WORDS = ["multiple", "us", "them", "him", "her", "is", "are"]
+LATER_WORDS = ["multiple", "us", "them", "him", "her", "is", "are", "few", "many", "this", "that", "there", "soon", "day", "make", "too"]
 WORDS = ["<end>"] + sorted({w for s in language.SLOTS for phrase in language.VOCAB[s] for w in phrase.split()} | set(EXTRA_WORDS)) + LATER_WORDS
 assert len(set(WORDS)) == len(WORDS)
 WORD_ID = {w: i for i, w in enumerate(WORDS)}
