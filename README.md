@@ -90,18 +90,42 @@ over held-out worlds. Three players per team.
 | team | team score | achievements / game | player lifetime (steps) |
 |---|---|---|---|
 | random | 1.9 | 2.9 | 178 |
-| scripted co-op, talking | 29.2 | 13.5 | 360 |
+| Laya, zero-shot (sampled / always top choice) | 1.9 / 0.0 | 2.9 / 0.0 | 184 / 212 |
+| von, zero-shot (sampled) | 1.7 | 3.9 | 175 |
+| **Laya, warm-started by imitation** (full fine-tune, 57k decisions) | **25.9** | 13.0 | 277 |
+| scripted co-op, talking (the team it imitated) | 29.2 | 13.5 | 360 |
 | scripted co-op, silent | 28.1 | 13.8 | 341 |
 | scripted co-op, speech muted | 28.8 | 13.5 | 297 |
 
-Zero-shot, measured under an earlier version of the rules (before shades and short campfires; to be
-re-run): Laya 1.5 and von 1.4 against random 1.5 — both indistinguishable from random, and both
-score 0–0.6 when they always take their top choice. Neither model can play from a cold start.
-Trained results will be added as they arrive.
+**Zero-shot, neither model can play**: Laya and von are indistinguishable from random, and von costs
+one forward pass per option (several times slower) for the same result.
+
+**Imitation works this time.** One pass over 57k recorded decisions takes Laya from random to ~90% of
+its teacher's score, agreeing with the scripted team on 80% of held-out decisions. It lights campfires
+(2.1 a game), hands items over (7.6 dropped, 6.7 picked up) and fights shades. It does not yet share
+water, and its players go down more often than the scripted ones.
+
+**Speech needed its own training phase.** Only 3.6% of recorded decisions are sentences, so after the
+main pass the decoder produced fragments ("help" for "help me"; 0% of held-out sentences right). Two
+fixes: a decoder-only phase over the spoken samples (`mp/tune_speech.py`; the encoder is frozen, its
+outputs cached, 25 epochs take minutes), and a LayerNorm on the encoder states the decoder reads —
+raw, they saturated it. Held-out: 86% of words, 67% of whole sentences; the misses are mostly the exact
+compass word or distance in "I see coal southwest pretty close". With the same action policy:
+
+| warm-started Laya, speech decoder | team score | revives / game |
+|---|---|---|
+| fragments | 23.9 | 0.4 |
+| first tuning pass (44% of sentences right) | 24.0 | 1.4 |
+| tuned + normalised (67%) | 25.9 | 1.5 |
+
+Twenty worlds is a small sample, but the direction is the first sign that the words do something:
+a downed player who can say "help me" properly gets picked up.
 
 Honest reading of the scripted numbers: with a hand-written protocol, talking makes players live a
-little longer and lets them hand each other the makings of a stone campfire, but it does not yet
-move the team score. Whether a *learned* protocol does is the open question.
+little longer and lets them hand each other the makings of a stone campfire, but it does not move the
+team score. Whether a *learned* protocol does is the open question; reinforcement learning from the
+warm start (speech on vs off) is next, along with von's encoder under the same head and a study of
+how much of the encoder needs unfreezing.
 
 ## Credits and licences
 

@@ -2,97 +2,97 @@
  "team": "trained",
  "games": 20,
  "players": 3,
- "team_score": 24.02,
- "team_achievements": 12.3,
- "individual_achievements": 8.52,
- "game_length": 321.4,
- "player_lifetime": 279.4,
+ "team_score": 25.88,
+ "team_achievements": 13.0,
+ "individual_achievements": 9.03,
+ "game_length": 307.8,
+ "player_lifetime": 277.1,
  "per_game": {
-  "campfires": 2.05,
-  "dropped": 7.7,
-  "picked_up": 6.6,
-  "revives": 1.4,
-  "shades_defeated": 3.4,
+  "campfires": 2.1,
+  "dropped": 7.55,
+  "picked_up": 6.65,
+  "revives": 1.5,
+  "shades_defeated": 3.75,
   "shared_drinks": 0.0,
-  "times_downed": 4.4
+  "times_downed": 4.5
  },
- "sentences_per_100_player_steps": 6.79,
- "share_of_sentences_heard": 0.77,
+ "sentences_per_100_player_steps": 7.6,
+ "share_of_sentences_heard": 0.72,
  "top_words": [
   [
-   "me",
-   786
-  ],
-  [
    "help",
-   785
+   928
   ],
   [
-   "see",
-   185
-  ],
-  [
-   "close",
-   185
+   "me",
+   928
   ],
   [
    "I",
-   178
+   171
+  ],
+  [
+   "see",
+   171
+  ],
+  [
+   "close",
+   171
   ],
   [
    "need",
-   122
+   126
   ],
   [
    "wood",
-   95
-  ],
-  [
-   "pretty",
-   88
+   97
   ],
   [
    "by",
-   84
+   91
+  ],
+  [
+   "pretty",
+   80
   ],
   [
    "water",
-   74
+   72
   ],
   [
    "coal",
-   66
+   57
   ],
   [
-   "come",
-   51
+   "southwest",
+   39
   ]
  ],
  "success_rates": {
-  "collect_coal": 65.0,
+  "collect_coal": 70.0,
   "collect_diamond": 0.0,
   "collect_drink": 100.0,
-  "collect_iron": 5.0,
-  "collect_sapling": 90.0,
-  "collect_stone": 90.0,
+  "collect_iron": 0.0,
+  "collect_sapling": 85.0,
+  "collect_stone": 100.0,
   "collect_wood": 100.0,
-  "defeat_skeleton": 15.0,
+  "defeat_skeleton": 40.0,
   "defeat_zombie": 100.0,
   "eat_cow": 95.0,
   "eat_plant": 0.0,
   "make_iron_pickaxe": 0.0,
   "make_iron_sword": 0.0,
-  "make_stone_pickaxe": 15.0,
-  "make_stone_sword": 5.0,
+  "make_stone_pickaxe": 35.0,
+  "make_stone_sword": 15.0,
   "make_wood_pickaxe": 100.0,
-  "make_wood_sword": 75.0,
-  "place_furnace": 25.0,
-  "place_plant": 90.0,
+  "make_wood_sword": 80.0,
+  "place_furnace": 50.0,
+  "place_plant": 80.0,
   "place_stone": 65.0,
   "place_table": 100.0,
-  "wake_up": 95.0
+  "wake_up": 85.0
  },
- "seconds": 683.9,
+ "seconds": 1566.1,
  "games_detail": [
   {
    "seed": 10000,
@@ -101,38 +101,38 @@
     "Dara",
     "Cleo"
    ],
-   "steps": 194,
+   "steps": 382,
    "team_achievements": [
-    "collect_coal",
     "collect_drink",
     "collect_sapling",
     "collect_stone",
     "collect_wood",
+    "defeat_skeleton",
     "defeat_zombie",
     "eat_cow",
     "make_wood_pickaxe",
     "make_wood_sword",
     "place_plant",
-    "place_stone",
-    "place_table"
+    "place_table",
+    "wake_up"
    ],
    "individual": [
+    9,
     5,
-    6,
     12
    ],
    "lifetimes": [
-    194,
-    194,
-    194
+    311,
+    221,
+    382
    ],
    "stats": {
-    "dropped": 3,
-    "picked_up": 3,
+    "dropped": 8,
+    "picked_up": 8,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 3,
+    "campfires": 4,
     "shades_defeated": 4
    }
   },
@@ -143,10 +143,11 @@
     "Joss",
     "Kofi"
    ],
-   "steps": 216,
+   "steps": 189,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
+    "collect_stone",
     "collect_wood",
     "defeat_zombie",
     "eat_cow",
@@ -157,14 +158,14 @@
     "wake_up"
    ],
    "individual": [
-    9,
-    8,
-    9
+    5,
+    7,
+    7
    ],
    "lifetimes": [
-    216,
-    216,
-    216
+    189,
+    172,
+    189
    ],
    "stats": {
     "dropped": 1,
@@ -172,8 +173,8 @@
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 1
+    "campfires": 2,
+    "shades_defeated": 0
    }
   },
   {
@@ -183,40 +184,37 @@
     "Faye",
     "Gus"
    ],
-   "steps": 219,
+   "steps": 211,
    "team_achievements": [
     "collect_coal",
     "collect_drink",
-    "collect_sapling",
     "collect_stone",
     "collect_wood",
     "defeat_zombie",
     "eat_cow",
     "make_wood_pickaxe",
     "place_furnace",
-    "place_plant",
     "place_stone",
-    "place_table",
-    "wake_up"
+    "place_table"
    ],
    "individual": [
-    10,
     9,
-    9
+    9,
+    3
    ],
    "lifetimes": [
-    219,
-    219,
-    219
+    211,
+    211,
+    211
    ],
    "stats": {
-    "dropped": 6,
-    "picked_up": 6,
-    "revives": 2,
-    "times_downed": 5,
+    "dropped": 9,
+    "picked_up": 9,
+    "revives": 1,
+    "times_downed": 4,
     "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 2
+    "campfires": 2,
+    "shades_defeated": 1
    }
   },
   {
@@ -226,9 +224,355 @@
     "Freya",
     "Ada"
    ],
-   "steps": 275,
+   "steps": 563,
    "team_achievements": [
     "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_skeleton",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_stone_sword",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    9,
+    9,
+    13
+   ],
+   "lifetimes": [
+    393,
+    350,
+    563
+   ],
+   "stats": {
+    "dropped": 19,
+    "picked_up": 18,
+    "revives": 1,
+    "times_downed": 4,
+    "shared_drinks": 0,
+    "campfires": 2,
+    "shades_defeated": 6
+   }
+  },
+  {
+   "seed": 10004,
+   "names": [
+    "Zeke",
+    "Hana",
+    "Ada"
+   ],
+   "steps": 193,
+   "team_achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "place_furnace",
+    "place_plant",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    9,
+    5,
+    5
+   ],
+   "lifetimes": [
+    193,
+    181,
+    192
+   ],
+   "stats": {
+    "dropped": 1,
+    "picked_up": 1,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0,
+    "shades_defeated": 4
+   }
+  },
+  {
+   "seed": 10005,
+   "names": [
+    "Uma",
+    "Leo",
+    "Opal"
+   ],
+   "steps": 491,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_skeleton",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    11,
+    11,
+    15
+   ],
+   "lifetimes": [
+    491,
+    491,
+    304
+   ],
+   "stats": {
+    "dropped": 14,
+    "picked_up": 13,
+    "revives": 2,
+    "times_downed": 5,
+    "shared_drinks": 0,
+    "campfires": 3,
+    "shades_defeated": 9
+   }
+  },
+  {
+   "seed": 10006,
+   "names": [
+    "Hugo",
+    "Vera",
+    "Jun"
+   ],
+   "steps": 194,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "individual": [
+    9,
+    8,
+    10
+   ],
+   "lifetimes": [
+    194,
+    194,
+    188
+   ],
+   "stats": {
+    "dropped": 7,
+    "picked_up": 5,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 1,
+    "shades_defeated": 0
+   }
+  },
+  {
+   "seed": 10007,
+   "names": [
+    "Lena",
+    "Hana",
+    "Uma"
+   ],
+   "steps": 267,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_stone",
+    "collect_wood",
+    "defeat_skeleton",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    9,
+    7,
+    10
+   ],
+   "lifetimes": [
+    214,
+    219,
+    267
+   ],
+   "stats": {
+    "dropped": 2,
+    "picked_up": 2,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 4,
+    "shades_defeated": 1
+   }
+  },
+  {
+   "seed": 10008,
+   "names": [
+    "Hana",
+    "Gael",
+    "Ivo"
+   ],
+   "steps": 260,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
+    "place_plant",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    8,
+    7,
+    12
+   ],
+   "lifetimes": [
+    260,
+    184,
+    217
+   ],
+   "stats": {
+    "dropped": 6,
+    "picked_up": 5,
+    "revives": 1,
+    "times_downed": 4,
+    "shared_drinks": 0,
+    "campfires": 1,
+    "shades_defeated": 3
+   }
+  },
+  {
+   "seed": 10009,
+   "names": [
+    "Cleo",
+    "Nico",
+    "Devi"
+   ],
+   "steps": 435,
+   "team_achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    9,
+    9,
+    6
+   ],
+   "lifetimes": [
+    435,
+    435,
+    435
+   ],
+   "stats": {
+    "dropped": 6,
+    "picked_up": 5,
+    "revives": 9,
+    "times_downed": 12,
+    "shared_drinks": 0,
+    "campfires": 2,
+    "shades_defeated": 5
+   }
+  },
+  {
+   "seed": 10010,
+   "names": [
+    "Milo",
+    "Opal",
+    "Xavi"
+   ],
+   "steps": 278,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_skeleton",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    12,
+    8,
+    10
+   ],
+   "lifetimes": [
+    278,
+    221,
+    278
+   ],
+   "stats": {
+    "dropped": 4,
+    "picked_up": 4,
+    "revives": 3,
+    "times_downed": 6,
+    "shared_drinks": 0,
+    "campfires": 3,
+    "shades_defeated": 5
+   }
+  },
+  {
+   "seed": 10011,
+   "names": [
+    "Gael",
+    "Leo",
+    "Kofi"
+   ],
+   "steps": 210,
+   "team_achievements": [
     "collect_drink",
     "collect_sapling",
     "collect_stone",
@@ -245,363 +589,23 @@
     "wake_up"
    ],
    "individual": [
-    14,
-    7,
-    12
-   ],
-   "lifetimes": [
-    275,
-    275,
-    275
-   ],
-   "stats": {
-    "dropped": 10,
-    "picked_up": 9,
-    "revives": 0,
-    "times_downed": 3,
-    "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 4
-   }
-  },
-  {
-   "seed": 10004,
-   "names": [
-    "Zeke",
-    "Hana",
-    "Ada"
-   ],
-   "steps": 168,
-   "team_achievements": [
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "place_plant",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    8,
-    9,
-    5
-   ],
-   "lifetimes": [
-    168,
-    168,
-    168
-   ],
-   "stats": {
-    "dropped": 3,
-    "picked_up": 3,
-    "revives": 0,
-    "times_downed": 3,
-    "shared_drinks": 0,
-    "campfires": 0,
-    "shades_defeated": 2
-   }
-  },
-  {
-   "seed": 10005,
-   "names": [
-    "Uma",
-    "Leo",
-    "Opal"
-   ],
-   "steps": 258,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
+    11,
     10,
-    8,
     7
    ],
    "lifetimes": [
-    258,
-    258,
-    258
-   ],
-   "stats": {
-    "dropped": 17,
-    "picked_up": 8,
-    "revives": 4,
-    "times_downed": 7,
-    "shared_drinks": 0,
-    "campfires": 2,
-    "shades_defeated": 2
-   }
-  },
-  {
-   "seed": 10006,
-   "names": [
-    "Hugo",
-    "Vera",
-    "Jun"
-   ],
-   "steps": 589,
-   "team_achievements": [
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_furnace",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    10,
-    10,
-    8
-   ],
-   "lifetimes": [
-    246,
-    589,
-    296
-   ],
-   "stats": {
-    "dropped": 8,
-    "picked_up": 8,
-    "revives": 0,
-    "times_downed": 3,
-    "shared_drinks": 0,
-    "campfires": 6,
-    "shades_defeated": 6
-   }
-  },
-  {
-   "seed": 10007,
-   "names": [
-    "Lena",
-    "Hana",
-    "Uma"
-   ],
-   "steps": 499,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_stone",
-    "collect_wood",
-    "defeat_skeleton",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_furnace",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    10,
-    8,
-    9
-   ],
-   "lifetimes": [
-    499,
-    499,
-    276
+    210,
+    210,
+    210
    ],
    "stats": {
     "dropped": 9,
     "picked_up": 9,
-    "revives": 2,
-    "times_downed": 5,
-    "shared_drinks": 0,
-    "campfires": 6,
-    "shades_defeated": 2
-   }
-  },
-  {
-   "seed": 10008,
-   "names": [
-    "Hana",
-    "Gael",
-    "Ivo"
-   ],
-   "steps": 251,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_skeleton",
-    "defeat_zombie",
-    "eat_cow",
-    "make_stone_pickaxe",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    12,
-    8,
-    11
-   ],
-   "lifetimes": [
-    251,
-    242,
-    251
-   ],
-   "stats": {
-    "dropped": 6,
-    "picked_up": 4,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 3,
-    "shades_defeated": 1
-   }
-  },
-  {
-   "seed": 10009,
-   "names": [
-    "Cleo",
-    "Nico",
-    "Devi"
-   ],
-   "steps": 231,
-   "team_achievements": [
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_plant",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    7,
-    7,
-    8
-   ],
-   "lifetimes": [
-    231,
-    231,
-    231
-   ],
-   "stats": {
-    "dropped": 6,
-    "picked_up": 4,
-    "revives": 1,
-    "times_downed": 4,
-    "shared_drinks": 0,
-    "campfires": 3,
+    "campfires": 1,
     "shades_defeated": 3
-   }
-  },
-  {
-   "seed": 10010,
-   "names": [
-    "Milo",
-    "Opal",
-    "Xavi"
-   ],
-   "steps": 1249,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_furnace",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    13,
-    7,
-    8
-   ],
-   "lifetimes": [
-    1249,
-    1061,
-    245
-   ],
-   "stats": {
-    "dropped": 16,
-    "picked_up": 16,
-    "revives": 7,
-    "times_downed": 10,
-    "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 0
-   }
-  },
-  {
-   "seed": 10011,
-   "names": [
-    "Gael",
-    "Leo",
-    "Kofi"
-   ],
-   "steps": 238,
-   "team_achievements": [
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    8,
-    8,
-    8
-   ],
-   "lifetimes": [
-    238,
-    238,
-    238
-   ],
-   "stats": {
-    "dropped": 5,
-    "picked_up": 5,
-    "revives": 3,
-    "times_downed": 6,
-    "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 9
    }
   },
   {
@@ -611,91 +615,7 @@
     "Suki",
     "Dara"
    ],
-   "steps": 206,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "make_wood_sword",
-    "place_plant",
-    "place_stone",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    8,
-    8,
-    11
-   ],
-   "lifetimes": [
-    206,
-    206,
-    206
-   ],
-   "stats": {
-    "dropped": 11,
-    "picked_up": 8,
-    "revives": 0,
-    "times_downed": 3,
-    "shared_drinks": 0,
-    "campfires": 2,
-    "shades_defeated": 3
-   }
-  },
-  {
-   "seed": 10013,
-   "names": [
-    "Kofi",
-    "Hana",
-    "Pia"
-   ],
-   "steps": 182,
-   "team_achievements": [
-    "collect_coal",
-    "collect_drink",
-    "collect_sapling",
-    "collect_stone",
-    "collect_wood",
-    "defeat_zombie",
-    "eat_cow",
-    "make_wood_pickaxe",
-    "place_plant",
-    "place_table",
-    "wake_up"
-   ],
-   "individual": [
-    8,
-    9,
-    8
-   ],
-   "lifetimes": [
-    182,
-    182,
-    182
-   ],
-   "stats": {
-    "dropped": 3,
-    "picked_up": 3,
-    "revives": 0,
-    "times_downed": 3,
-    "shared_drinks": 0,
-    "campfires": 0,
-    "shades_defeated": 3
-   }
-  },
-  {
-   "seed": 10014,
-   "names": [
-    "Zeke",
-    "Freya",
-    "Eli"
-   ],
-   "steps": 260,
+   "steps": 226,
    "team_achievements": [
     "collect_coal",
     "collect_drink",
@@ -707,42 +627,88 @@
     "eat_cow",
     "make_wood_pickaxe",
     "make_wood_sword",
+    "place_furnace",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "individual": [
+    8,
+    10,
+    10
+   ],
+   "lifetimes": [
+    226,
+    200,
+    192
+   ],
+   "stats": {
+    "dropped": 4,
+    "picked_up": 4,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 1,
+    "shades_defeated": 1
+   }
+  },
+  {
+   "seed": 10013,
+   "names": [
+    "Kofi",
+    "Hana",
+    "Pia"
+   ],
+   "steps": 326,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
     "place_plant",
     "place_stone",
     "place_table",
     "wake_up"
    ],
    "individual": [
-    8,
     9,
-    10
+    12,
+    12
    ],
    "lifetimes": [
-    260,
-    258,
-    260
+    320,
+    326,
+    308
    ],
    "stats": {
     "dropped": 12,
     "picked_up": 11,
-    "revives": 0,
-    "times_downed": 3,
+    "revives": 2,
+    "times_downed": 5,
     "shared_drinks": 0,
-    "campfires": 4,
-    "shades_defeated": 1
+    "campfires": 0,
+    "shades_defeated": 7
    }
   },
   {
-   "seed": 10015,
+   "seed": 10014,
    "names": [
-    "Lena",
     "Zeke",
-    "Faye"
+    "Freya",
+    "Eli"
    ],
-   "steps": 278,
+   "steps": 225,
    "team_achievements": [
+    "collect_coal",
     "collect_drink",
     "collect_sapling",
+    "collect_stone",
     "collect_wood",
     "defeat_zombie",
     "eat_cow",
@@ -755,21 +721,62 @@
    "individual": [
     9,
     8,
-    8
+    7
    ],
    "lifetimes": [
-    233,
-    278,
-    278
+    225,
+    188,
+    220
    ],
    "stats": {
     "dropped": 4,
-    "picked_up": 3,
-    "revives": 6,
-    "times_downed": 9,
+    "picked_up": 4,
+    "revives": 0,
+    "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 0,
-    "shades_defeated": 6
+    "campfires": 4,
+    "shades_defeated": 3
+   }
+  },
+  {
+   "seed": 10015,
+   "names": [
+    "Lena",
+    "Zeke",
+    "Faye"
+   ],
+   "steps": 241,
+   "team_achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "place_plant",
+    "place_table",
+    "wake_up"
+   ],
+   "individual": [
+    8,
+    10,
+    6
+   ],
+   "lifetimes": [
+    241,
+    179,
+    241
+   ],
+   "stats": {
+    "dropped": 7,
+    "picked_up": 5,
+    "revives": 1,
+    "times_downed": 4,
+    "shared_drinks": 0,
+    "campfires": 2,
+    "shades_defeated": 1
    }
   },
   {
@@ -779,37 +786,42 @@
     "Vera",
     "Kira"
    ],
-   "steps": 173,
+   "steps": 460,
    "team_achievements": [
+    "collect_coal",
     "collect_drink",
     "collect_sapling",
     "collect_stone",
     "collect_wood",
+    "defeat_skeleton",
     "defeat_zombie",
     "eat_cow",
     "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
     "place_plant",
+    "place_stone",
     "place_table",
     "wake_up"
    ],
    "individual": [
-    3,
     7,
-    6
+    14,
+    11
    ],
    "lifetimes": [
-    173,
-    173,
-    173
+    460,
+    421,
+    460
    ],
    "stats": {
-    "dropped": 0,
-    "picked_up": 0,
-    "revives": 0,
-    "times_downed": 3,
+    "dropped": 8,
+    "picked_up": 5,
+    "revives": 8,
+    "times_downed": 11,
     "shared_drinks": 0,
-    "campfires": 2,
-    "shades_defeated": 0
+    "campfires": 1,
+    "shades_defeated": 8
    }
   },
   {
@@ -819,39 +831,38 @@
     "Rafa",
     "Nico"
    ],
-   "steps": 423,
+   "steps": 293,
    "team_achievements": [
-    "collect_coal",
     "collect_drink",
-    "collect_sapling",
     "collect_stone",
     "collect_wood",
     "defeat_zombie",
     "eat_cow",
+    "make_stone_sword",
     "make_wood_pickaxe",
-    "place_plant",
+    "make_wood_sword",
     "place_stone",
     "place_table",
     "wake_up"
    ],
    "individual": [
-    6,
-    11,
-    6
+    9,
+    9,
+    7
    ],
    "lifetimes": [
-    423,
-    396,
-    135
+    293,
+    252,
+    293
    ],
    "stats": {
-    "dropped": 13,
-    "picked_up": 13,
-    "revives": 3,
-    "times_downed": 6,
+    "dropped": 8,
+    "picked_up": 8,
+    "revives": 2,
+    "times_downed": 5,
     "shared_drinks": 0,
-    "campfires": 1,
-    "shades_defeated": 9
+    "campfires": 2,
+    "shades_defeated": 6
    }
   },
   {
@@ -861,13 +872,14 @@
     "Joss",
     "Ben"
    ],
-   "steps": 295,
+   "steps": 491,
    "team_achievements": [
     "collect_coal",
     "collect_drink",
-    "collect_iron",
+    "collect_sapling",
     "collect_stone",
     "collect_wood",
+    "defeat_skeleton",
     "defeat_zombie",
     "eat_cow",
     "make_stone_pickaxe",
@@ -879,22 +891,22 @@
     "wake_up"
    ],
    "individual": [
-    8,
-    11,
-    7
+    13,
+    9,
+    11
    ],
    "lifetimes": [
-    255,
-    260,
-    295
+    336,
+    212,
+    491
    ],
    "stats": {
-    "dropped": 10,
-    "picked_up": 9,
+    "dropped": 14,
+    "picked_up": 10,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 2,
+    "campfires": 4,
     "shades_defeated": 7
    }
   },
@@ -905,7 +917,7 @@
     "Hana",
     "Pia"
    ],
-   "steps": 224,
+   "steps": 221,
    "team_achievements": [
     "collect_coal",
     "collect_drink",
@@ -914,30 +926,32 @@
     "collect_wood",
     "defeat_zombie",
     "eat_cow",
+    "make_stone_pickaxe",
     "make_wood_pickaxe",
     "make_wood_sword",
     "place_plant",
+    "place_stone",
     "place_table",
     "wake_up"
    ],
    "individual": [
-    5,
     10,
-    10
+    11,
+    7
    ],
    "lifetimes": [
-    224,
-    224,
-    202
+    221,
+    221,
+    197
    ],
    "stats": {
-    "dropped": 11,
-    "picked_up": 9,
+    "dropped": 8,
+    "picked_up": 6,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
-    "campfires": 2,
-    "shades_defeated": 3
+    "campfires": 3,
+    "shades_defeated": 1
    }
   }
  ],
