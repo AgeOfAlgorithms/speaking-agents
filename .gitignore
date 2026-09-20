@@ -1,0 +1,7 @@
+# large or regenerable
+data/
+models/
+traces/
+__pycache__/
+*.pyc
+logs_*.txt

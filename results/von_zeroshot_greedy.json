@@ -1,0 +1,724 @@
+{
+ "team": "von",
+ "games": 20,
+ "players": 3,
+ "team_score": 0.61,
+ "team_achievements": 1.65,
+ "individual_achievements": 1.17,
+ "game_length": 172.4,
+ "player_lifetime": 129.8,
+ "per_game": {
+  "campfires": 0.0,
+  "dropped": 0.0,
+  "picked_up": 0.0,
+  "revives": 0.0,
+  "shared_drinks": 0.0,
+  "times_downed": 3.0
+ },
+ "sentences_per_100_player_steps": 0.15,
+ "share_of_sentences_heard": 1.0,
+ "top_words": [
+  [
+   "you",
+   17
+  ],
+  [
+   "northeast",
+   7
+  ],
+  [
+   "we",
+   5
+  ],
+  [
+   "could",
+   5
+  ],
+  [
+   "go",
+   5
+  ],
+  [
+   "should",
+   3
+  ],
+  [
+   "it",
+   2
+  ],
+  [
+   "southeast",
+   1
+  ],
+  [
+   "need",
+   1
+  ],
+  [
+   "close",
+   1
+  ],
+  [
+   "by",
+   1
+  ],
+  [
+   "here",
+   1
+  ]
+ ],
+ "success_rates": {
+  "collect_coal": 0.0,
+  "collect_diamond": 0.0,
+  "collect_drink": 0.0,
+  "collect_iron": 0.0,
+  "collect_sapling": 100.0,
+  "collect_stone": 0.0,
+  "collect_wood": 0.0,
+  "defeat_skeleton": 0.0,
+  "defeat_zombie": 5.0,
+  "eat_cow": 0.0,
+  "eat_plant": 0.0,
+  "make_iron_pickaxe": 0.0,
+  "make_iron_sword": 0.0,
+  "make_stone_pickaxe": 0.0,
+  "make_stone_sword": 0.0,
+  "make_wood_pickaxe": 0.0,
+  "make_wood_sword": 0.0,
+  "place_furnace": 0.0,
+  "place_plant": 0.0,
+  "place_stone": 0.0,
+  "place_table": 0.0,
+  "wake_up": 60.0
+ },
+ "seconds": 1181.3,
+ "games_detail": [
+  {
+   "seed": 10000,
+   "names": [
+    "Hana",
+    "Dara",
+    "Cleo"
+   ],
+   "steps": 183,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    92,
+    183,
+    183
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10001,
+   "names": [
+    "Ada",
+    "Joss",
+    "Kofi"
+   ],
+   "steps": 164,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    164,
+    75,
+    164
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10002,
+   "names": [
+    "Wren",
+    "Faye",
+    "Gus"
+   ],
+   "steps": 158,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    2,
+    1
+   ],
+   "lifetimes": [
+    92,
+    158,
+    97
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10003,
+   "names": [
+    "Yara",
+    "Freya",
+    "Ada"
+   ],
+   "steps": 227,
+   "team_achievements": [
+    "collect_sapling",
+    "defeat_zombie",
+    "wake_up"
+   ],
+   "individual": [
+    3,
+    1,
+    1
+   ],
+   "lifetimes": [
+    166,
+    227,
+    84
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10004,
+   "names": [
+    "Zeke",
+    "Hana",
+    "Ada"
+   ],
+   "steps": 238,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    115,
+    238,
+    127
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10005,
+   "names": [
+    "Uma",
+    "Leo",
+    "Opal"
+   ],
+   "steps": 160,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    160,
+    88,
+    160
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10006,
+   "names": [
+    "Hugo",
+    "Vera",
+    "Jun"
+   ],
+   "steps": 81,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    2
+   ],
+   "lifetimes": [
+    80,
+    76,
+    81
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10007,
+   "names": [
+    "Lena",
+    "Hana",
+    "Uma"
+   ],
+   "steps": 145,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    2,
+    1,
+    1
+   ],
+   "lifetimes": [
+    145,
+    78,
+    145
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10008,
+   "names": [
+    "Hana",
+    "Gael",
+    "Ivo"
+   ],
+   "steps": 113,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    113,
+    99,
+    113
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10009,
+   "names": [
+    "Cleo",
+    "Nico",
+    "Devi"
+   ],
+   "steps": 88,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    88,
+    88,
+    88
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10010,
+   "names": [
+    "Milo",
+    "Opal",
+    "Xavi"
+   ],
+   "steps": 111,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    2,
+    1,
+    1
+   ],
+   "lifetimes": [
+    102,
+    83,
+    111
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10011,
+   "names": [
+    "Gael",
+    "Leo",
+    "Kofi"
+   ],
+   "steps": 145,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    108,
+    80,
+    145
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10012,
+   "names": [
+    "Faye",
+    "Suki",
+    "Dara"
+   ],
+   "steps": 380,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    2,
+    1,
+    1
+   ],
+   "lifetimes": [
+    164,
+    380,
+    87
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10013,
+   "names": [
+    "Kofi",
+    "Hana",
+    "Pia"
+   ],
+   "steps": 201,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    78,
+    201,
+    124
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10014,
+   "names": [
+    "Zeke",
+    "Freya",
+    "Eli"
+   ],
+   "steps": 155,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    76,
+    81,
+    155
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10015,
+   "names": [
+    "Lena",
+    "Zeke",
+    "Faye"
+   ],
+   "steps": 49,
+   "team_achievements": [
+    "collect_sapling"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    49,
+    49,
+    49
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10016,
+   "names": [
+    "Gus",
+    "Vera",
+    "Kira"
+   ],
+   "steps": 174,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    174,
+    104,
+    174
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10017,
+   "names": [
+    "Kofi",
+    "Rafa",
+    "Nico"
+   ],
+   "steps": 138,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    2,
+    2
+   ],
+   "lifetimes": [
+    103,
+    117,
+    138
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10018,
+   "names": [
+    "Uma",
+    "Joss",
+    "Ben"
+   ],
+   "steps": 380,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    2
+   ],
+   "lifetimes": [
+    178,
+    380,
+    104
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  },
+  {
+   "seed": 10019,
+   "names": [
+    "Lena",
+    "Hana",
+    "Pia"
+   ],
+   "steps": 159,
+   "team_achievements": [
+    "collect_sapling",
+    "wake_up"
+   ],
+   "individual": [
+    1,
+    1,
+    1
+   ],
+   "lifetimes": [
+    159,
+    106,
+    159
+   ],
+   "stats": {
+    "dropped": 0,
+    "picked_up": 0,
+    "revives": 0,
+    "times_downed": 3,
+    "shared_drinks": 0,
+    "campfires": 0
+   }
+  }
+ ],
+ "config": {
+  "team": "von",
+  "model": null,
+  "players": 3,
+  "games": 20,
+  "length": 10000,
+  "hear_radius": 16,
+  "argmax": true,
+  "no_mask": false,
+  "no_speech": false,
+  "mute": false,
+  "tag": "von_zeroshot_greedy"
+ },
+ "truncated_inputs": "0 / 52718"
+}
