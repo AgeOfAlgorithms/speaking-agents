@@ -320,6 +320,9 @@ def make(kind, seed=0):
     if kind == "laya_trained":
         from mp.laya_policy import LayaAgent, TrainedMP
         return LayaAgent("models/team_bc", kind=kind, backend=TrainedMP)
+    if kind == "needle_zeroshot":
+        from mp.laya_policy import LayaAgent, NeedleMP
+        return LayaAgent("needle3", kind=kind, backend=NeedleMP)
     if kind == "von_zeroshot":
         from mp.laya_policy import LayaAgent, VonMP
         return LayaAgent("wfzyx/von-1.0", kind=kind, backend=VonMP)

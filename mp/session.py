@@ -168,7 +168,7 @@ def describe():
     import os
     trained = os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "team_bc", "speech.safetensors"))
     kinds = {"scripted": "Scripted (talks)", "scripted_silent": "Scripted (silent)", "laya_zeroshot": "Laya, untrained",
-             "von_zeroshot": "von, untrained", "random": "Random", "human": "You"}
+             "von_zeroshot": "von, untrained", "needle_zeroshot": "needle, untrained", "random": "Random", "human": "You"}
     if trained:
         kinds = {"laya_trained": "Laya, trained", **kinds}
     return {"actions": ACTIONS, "slots": list(language.SLOTS), "vocab": language.VOCAB,
@@ -177,6 +177,7 @@ def describe():
                             "scripted_silent": "same hand-written rules, never speaks",
                             "laya_trained": "Laya warm-started on the scripted co-op team: one pass picks the action or 'speak', a small decoder writes the sentence",
                             "laya_zeroshot": "Laya straight from the hub, never trained on this game (loads in ~15 s)",
+                            "needle_zeroshot": "Needle 3, a small tool-calling model, straight from the hub (CPU, ~1 s per decision)",
                             "von_zeroshot": "von-1.0 (NLI model) straight from the hub, never trained on this game",
                             "random": "random actions", "human": "you"},
             "menus": {"craft": craft, "place": place, "drop": drop},

@@ -31,7 +31,7 @@ ACH = list(constants.achievements)
 
 
 def make_team(team, n, game, args):
-    if team in ("laya", "von", "trained"):
+    if team in ("laya", "von", "needle", "trained"):
         return None
     return [agents.make(team, seed=1000 * game + i) for i in range(n)]
 
@@ -113,7 +113,7 @@ def report(tag, r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--team", required=True, choices=["random", "scripted", "scripted_silent", "laya", "von", "trained"])
+    ap.add_argument("--team", required=True, choices=["random", "scripted", "scripted_silent", "laya", "von", "needle", "trained"])
     ap.add_argument("--model", default=None, help="hub id or local folder (default: the public checkpoint)")
     ap.add_argument("--players", type=int, default=3)
     ap.add_argument("--games", type=int, default=20)
@@ -131,6 +131,9 @@ def main():
         from mp.laya_policy import LayaMP, VonMP
         backend, default = (LayaMP, "convaiinnovations/laya") if args.team == "laya" else (VonMP, "wfzyx/von-1.0")
         policy = backend(args.model or default, sample=not args.argmax, mask=not args.no_mask, can_speak=not args.no_speech)
+    elif args.team == "needle":
+        from mp.laya_policy import NeedleMP
+        policy = NeedleMP(mask=not args.no_mask, can_speak=not args.no_speech)
     elif args.team == "trained":
         from mp.laya_policy import TrainedMP
         policy = TrainedMP(args.model, sample=not args.argmax, mask=not args.no_mask, can_speak=not args.no_speech)
@@ -138,6 +141,8 @@ def main():
     r["config"] = vars(args)
     if policy is not None:
         r["truncated_inputs"] = "%d / %d" % (policy.truncated, policy.calls)
+        if hasattr(policy, "refusals"):
+            r["refused_to_call"] = "%d / %d" % (policy.refusals, policy.calls)
     tag = args.tag or args.team
     report(tag, r)
     os.makedirs("results", exist_ok=True)

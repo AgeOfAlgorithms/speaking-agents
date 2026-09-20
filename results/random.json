@@ -2,11 +2,11 @@
  "team": "random",
  "games": 50,
  "players": 3,
- "team_score": 1.71,
- "team_achievements": 2.86,
- "individual_achievements": 1.57,
- "game_length": 187.7,
- "player_lifetime": 180.8,
+ "team_score": 1.87,
+ "team_achievements": 2.94,
+ "individual_achievements": 1.59,
+ "game_length": 185.8,
+ "player_lifetime": 178.4,
  "per_game": {
   "campfires": 0.0,
   "dropped": 1.02,
@@ -16,24 +16,24 @@
   "shared_drinks": 0.0,
   "times_downed": 3.0
  },
- "sentences_per_100_player_steps": 2.53,
+ "sentences_per_100_player_steps": 2.51,
  "share_of_sentences_heard": 0.99,
  "top_words": [
   [
    "far",
-   337
+   334
   ],
   [
    "pretty",
-   227
+   221
   ],
   [
    "close",
-   222
+   214
   ],
   [
    "away",
-   113
+   112
   ],
   [
    "very",
@@ -41,18 +41,18 @@
   ],
   [
    "by",
-   109
+   105
   ],
   [
    "you",
-   103
-  ],
-  [
-   "zombie",
-   98
+   104
   ],
   [
    "shade",
+   92
+  ],
+  [
+   "zombie",
    91
   ],
   [
@@ -60,12 +60,12 @@
    87
   ],
   [
-   "skeleton",
-   85
+   "cow",
+   87
   ],
   [
-   "cow",
-   85
+   "can",
+   84
   ]
  ],
  "success_rates": {
@@ -73,7 +73,7 @@
   "collect_diamond": 0.0,
   "collect_drink": 28.0,
   "collect_iron": 0.0,
-  "collect_sapling": 64.0,
+  "collect_sapling": 66.0,
   "collect_stone": 0.0,
   "collect_wood": 54.0,
   "defeat_skeleton": 0.0,
@@ -84,15 +84,15 @@
   "make_iron_sword": 0.0,
   "make_stone_pickaxe": 0.0,
   "make_stone_sword": 0.0,
-  "make_wood_pickaxe": 0.0,
+  "make_wood_pickaxe": 2.0,
   "make_wood_sword": 2.0,
   "place_furnace": 0.0,
-  "place_plant": 36.0,
+  "place_plant": 40.0,
   "place_stone": 0.0,
   "place_table": 2.0,
   "wake_up": 100.0
  },
- "seconds": 18.2,
+ "seconds": 22.4,
  "games_detail": [
   {
    "seed": 10000,
@@ -101,19 +101,20 @@
     "Dara",
     "Cleo"
    ],
-   "steps": 216,
+   "steps": 159,
    "team_achievements": [
+    "collect_sapling",
     "wake_up"
    ],
    "individual": [
     1,
-    1,
-    1
+    2,
+    2
    ],
    "lifetimes": [
-    190,
-    206,
-    216
+    159,
+    159,
+    159
    ],
    "stats": {
     "dropped": 0,
@@ -132,19 +133,19 @@
     "Joss",
     "Kofi"
    ],
-   "steps": 168,
+   "steps": 178,
    "team_achievements": [
     "wake_up"
    ],
    "individual": [
     1,
     1,
-    0
+    1
    ],
    "lifetimes": [
-    168,
-    168,
-    168
+    178,
+    178,
+    178
    ],
    "stats": {
     "dropped": 0,
@@ -163,7 +164,7 @@
     "Faye",
     "Gus"
    ],
-   "steps": 178,
+   "steps": 188,
    "team_achievements": [
     "collect_sapling",
     "collect_wood",
@@ -172,17 +173,17 @@
    ],
    "individual": [
     3,
-    2,
+    1,
     1
    ],
    "lifetimes": [
-    178,
-    178,
-    178
+    188,
+    188,
+    188
    ],
    "stats": {
-    "dropped": 3,
-    "picked_up": 1,
+    "dropped": 2,
+    "picked_up": 0,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
@@ -197,7 +198,7 @@
     "Freya",
     "Ada"
    ],
-   "steps": 201,
+   "steps": 180,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -211,9 +212,9 @@
     2
    ],
    "lifetimes": [
-    194,
-    201,
-    201
+    180,
+    180,
+    180
    ],
    "stats": {
     "dropped": 1,
@@ -232,20 +233,21 @@
     "Hana",
     "Ada"
    ],
-   "steps": 169,
+   "steps": 175,
    "team_achievements": [
     "collect_drink",
+    "collect_sapling",
     "wake_up"
    ],
    "individual": [
-    1,
+    2,
     2,
     1
    ],
    "lifetimes": [
-    169,
-    169,
-    169
+    175,
+    175,
+    175
    ],
    "stats": {
     "dropped": 0,
@@ -264,7 +266,7 @@
     "Leo",
     "Opal"
    ],
-   "steps": 216,
+   "steps": 214,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -272,14 +274,14 @@
     "wake_up"
    ],
    "individual": [
-    2,
+    1,
     2,
     3
    ],
    "lifetimes": [
-    216,
-    216,
-    216
+    214,
+    214,
+    214
    ],
    "stats": {
     "dropped": 0,
@@ -298,7 +300,7 @@
     "Vera",
     "Jun"
    ],
-   "steps": 202,
+   "steps": 194,
    "team_achievements": [
     "wake_up"
    ],
@@ -309,8 +311,8 @@
    ],
    "lifetimes": [
     100,
-    195,
-    202
+    194,
+    194
    ],
    "stats": {
     "dropped": 0,
@@ -363,14 +365,12 @@
    ],
    "steps": 175,
    "team_achievements": [
-    "collect_sapling",
     "collect_wood",
-    "place_plant",
     "wake_up"
    ],
    "individual": [
     1,
-    3,
+    1,
     1
    ],
    "lifetimes": [
@@ -395,7 +395,7 @@
     "Nico",
     "Devi"
    ],
-   "steps": 162,
+   "steps": 159,
    "team_achievements": [
     "wake_up"
    ],
@@ -405,9 +405,9 @@
     1
    ],
    "lifetimes": [
-    162,
-    162,
-    162
+    159,
+    159,
+    159
    ],
    "stats": {
     "dropped": 0,
@@ -426,21 +426,20 @@
     "Opal",
     "Xavi"
    ],
-   "steps": 198,
+   "steps": 267,
    "team_achievements": [
     "collect_drink",
-    "collect_sapling",
     "wake_up"
    ],
    "individual": [
     1,
-    2,
+    1,
     2
    ],
    "lifetimes": [
-    198,
-    198,
-    198
+    249,
+    267,
+    267
    ],
    "stats": {
     "dropped": 0,
@@ -459,21 +458,22 @@
     "Leo",
     "Kofi"
    ],
-   "steps": 246,
+   "steps": 221,
    "team_achievements": [
     "collect_sapling",
     "collect_wood",
+    "place_plant",
     "wake_up"
    ],
    "individual": [
-    3,
-    0,
-    1
+    2,
+    2,
+    4
    ],
    "lifetimes": [
-    246,
-    192,
-    233
+    221,
+    221,
+    221
    ],
    "stats": {
     "dropped": 2,
@@ -492,7 +492,7 @@
     "Suki",
     "Dara"
    ],
-   "steps": 218,
+   "steps": 215,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -500,14 +500,14 @@
     "wake_up"
    ],
    "individual": [
-    3,
+    2,
     1,
     2
    ],
    "lifetimes": [
-    218,
-    218,
-    218
+    192,
+    215,
+    184
    ],
    "stats": {
     "dropped": 0,
@@ -526,7 +526,7 @@
     "Hana",
     "Pia"
    ],
-   "steps": 165,
+   "steps": 158,
    "team_achievements": [
     "collect_sapling",
     "place_plant",
@@ -538,9 +538,9 @@
     1
    ],
    "lifetimes": [
-    165,
-    165,
-    165
+    158,
+    158,
+    158
    ],
    "stats": {
     "dropped": 0,
@@ -559,20 +559,20 @@
     "Freya",
     "Eli"
    ],
-   "steps": 172,
+   "steps": 163,
    "team_achievements": [
     "collect_sapling",
     "wake_up"
    ],
    "individual": [
-    2,
     1,
+    0,
     1
    ],
    "lifetimes": [
-    172,
-    172,
-    172
+    163,
+    163,
+    163
    ],
    "stats": {
     "dropped": 1,
@@ -591,20 +591,20 @@
     "Zeke",
     "Faye"
    ],
-   "steps": 157,
+   "steps": 216,
    "team_achievements": [
     "collect_sapling",
     "wake_up"
    ],
    "individual": [
     2,
-    1,
+    2,
     0
    ],
    "lifetimes": [
-    151,
-    157,
-    94
+    149,
+    216,
+    95
    ],
    "stats": {
     "dropped": 1,
@@ -623,21 +623,20 @@
     "Vera",
     "Kira"
    ],
-   "steps": 194,
+   "steps": 184,
    "team_achievements": [
-    "collect_sapling",
     "collect_wood",
     "wake_up"
    ],
    "individual": [
     2,
     1,
-    3
+    2
    ],
    "lifetimes": [
-    194,
-    188,
-    194
+    184,
+    184,
+    184
    ],
    "stats": {
     "dropped": 2,
@@ -656,7 +655,7 @@
     "Rafa",
     "Nico"
    ],
-   "steps": 162,
+   "steps": 160,
    "team_achievements": [
     "collect_wood",
     "wake_up"
@@ -667,9 +666,9 @@
     1
    ],
    "lifetimes": [
-    130,
-    162,
-    162
+    160,
+    160,
+    160
    ],
    "stats": {
     "dropped": 0,
@@ -688,25 +687,27 @@
     "Joss",
     "Ben"
    ],
-   "steps": 192,
+   "steps": 187,
    "team_achievements": [
+    "collect_sapling",
     "collect_wood",
+    "make_wood_pickaxe",
     "make_wood_sword",
     "place_table",
     "wake_up"
    ],
    "individual": [
-    1,
-    4,
+    2,
+    5,
     2
    ],
    "lifetimes": [
-    192,
-    192,
-    192
+    187,
+    187,
+    187
    ],
    "stats": {
-    "dropped": 3,
+    "dropped": 2,
     "picked_up": 2,
     "revives": 0,
     "times_downed": 3,
@@ -722,7 +723,7 @@
     "Hana",
     "Pia"
    ],
-   "steps": 178,
+   "steps": 166,
    "team_achievements": [
     "collect_sapling",
     "wake_up"
@@ -733,9 +734,9 @@
     1
    ],
    "lifetimes": [
-    178,
-    178,
-    178
+    166,
+    166,
+    166
    ],
    "stats": {
     "dropped": 2,
@@ -754,24 +755,23 @@
     "Xavi",
     "Nora"
    ],
-   "steps": 218,
+   "steps": 209,
    "team_achievements": [
-    "collect_sapling",
     "collect_wood",
     "wake_up"
    ],
    "individual": [
     1,
-    2,
+    1,
     2
    ],
    "lifetimes": [
-    218,
-    218,
+    209,
+    209,
     175
    ],
    "stats": {
-    "dropped": 1,
+    "dropped": 0,
     "picked_up": 0,
     "revives": 0,
     "times_downed": 3,
@@ -787,7 +787,7 @@
     "Devi",
     "Vera"
    ],
-   "steps": 243,
+   "steps": 170,
    "team_achievements": [
     "collect_drink",
     "wake_up"
@@ -798,9 +798,9 @@
     1
    ],
    "lifetimes": [
-    243,
-    195,
-    192
+    170,
+    170,
+    170
    ],
    "stats": {
     "dropped": 0,
@@ -819,7 +819,7 @@
     "Zeke",
     "Wren"
    ],
-   "steps": 232,
+   "steps": 252,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -832,9 +832,9 @@
     1
    ],
    "lifetimes": [
-    232,
-    232,
-    221
+    252,
+    252,
+    189
    ],
    "stats": {
     "dropped": 1,
@@ -853,24 +853,24 @@
     "Uma",
     "Freya"
    ],
-   "steps": 148,
+   "steps": 152,
    "team_achievements": [
     "collect_sapling",
     "place_plant",
     "wake_up"
    ],
    "individual": [
-    0,
+    1,
     1,
     2
    ],
    "lifetimes": [
-    148,
-    148,
-    148
+    152,
+    152,
+    152
    ],
    "stats": {
-    "dropped": 1,
+    "dropped": 2,
     "picked_up": 1,
     "revives": 0,
     "times_downed": 3,
@@ -920,7 +920,7 @@
     "Cleo",
     "Tomas"
    ],
-   "steps": 196,
+   "steps": 184,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -933,9 +933,9 @@
     1
    ],
    "lifetimes": [
-    196,
-    190,
-    196
+    184,
+    184,
+    184
    ],
    "stats": {
     "dropped": 4,
@@ -1052,20 +1052,22 @@
     "Freya",
     "Eli"
    ],
-   "steps": 205,
+   "steps": 161,
    "team_achievements": [
+    "collect_sapling",
     "collect_wood",
+    "place_plant",
     "wake_up"
    ],
    "individual": [
-    1,
-    2,
-    1
+    3,
+    3,
+    0
    ],
    "lifetimes": [
-    205,
-    200,
-    205
+    161,
+    161,
+    113
    ],
    "stats": {
     "dropped": 1,
@@ -1084,7 +1086,7 @@
     "Ada",
     "Dara"
    ],
-   "steps": 173,
+   "steps": 171,
    "team_achievements": [
     "collect_sapling",
     "collect_wood",
@@ -1097,8 +1099,8 @@
     1
    ],
    "lifetimes": [
-    173,
-    173,
+    171,
+    171,
     89
    ],
    "stats": {
@@ -1118,7 +1120,7 @@
     "Tomas",
     "Freya"
    ],
-   "steps": 169,
+   "steps": 181,
    "team_achievements": [
     "collect_wood",
     "wake_up"
@@ -1129,12 +1131,12 @@
     2
    ],
    "lifetimes": [
-    169,
-    169,
-    169
+    181,
+    181,
+    139
    ],
    "stats": {
-    "dropped": 1,
+    "dropped": 0,
     "picked_up": 0,
     "revives": 0,
     "times_downed": 3,
@@ -1185,7 +1187,7 @@
     "Bea",
     "Opal"
    ],
-   "steps": 188,
+   "steps": 189,
    "team_achievements": [
     "collect_sapling",
     "wake_up"
@@ -1196,9 +1198,9 @@
     2
    ],
    "lifetimes": [
-    188,
-    188,
-    188
+    189,
+    189,
+    189
    ],
    "stats": {
     "dropped": 2,
@@ -1217,7 +1219,7 @@
     "Suki",
     "Tomas"
    ],
-   "steps": 238,
+   "steps": 188,
    "team_achievements": [
     "collect_drink",
     "collect_wood",
@@ -1230,7 +1232,7 @@
    ],
    "lifetimes": [
     134,
-    238,
+    188,
     187
    ],
    "stats": {
@@ -1250,24 +1252,24 @@
     "Eli",
     "Ines"
    ],
-   "steps": 208,
+   "steps": 233,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
     "wake_up"
    ],
    "individual": [
-    1,
     2,
+    1,
     1
    ],
    "lifetimes": [
-    208,
-    208,
-    208
+    177,
+    229,
+    233
    ],
    "stats": {
-    "dropped": 0,
+    "dropped": 1,
     "picked_up": 0,
     "revives": 0,
     "times_downed": 3,
@@ -1283,7 +1285,7 @@
     "Xavi",
     "Opal"
    ],
-   "steps": 169,
+   "steps": 173,
    "team_achievements": [
     "collect_sapling",
     "place_plant",
@@ -1296,8 +1298,8 @@
    ],
    "lifetimes": [
     94,
-    169,
-    169
+    173,
+    173
    ],
    "stats": {
     "dropped": 0,
@@ -1316,7 +1318,7 @@
     "Yara",
     "Nico"
    ],
-   "steps": 236,
+   "steps": 203,
    "team_achievements": [
     "collect_sapling",
     "wake_up"
@@ -1327,12 +1329,12 @@
     0
    ],
    "lifetimes": [
-    236,
-    236,
-    174
+    203,
+    203,
+    203
    ],
    "stats": {
-    "dropped": 1,
+    "dropped": 2,
     "picked_up": 0,
     "revives": 0,
     "times_downed": 3,
@@ -1416,7 +1418,7 @@
     "Bea",
     "Eli"
    ],
-   "steps": 160,
+   "steps": 228,
    "team_achievements": [
     "collect_sapling",
     "collect_wood",
@@ -1424,14 +1426,14 @@
     "wake_up"
    ],
    "individual": [
-    3,
+    1,
     1,
     3
    ],
    "lifetimes": [
-    160,
-    160,
-    160
+    186,
+    223,
+    228
    ],
    "stats": {
     "dropped": 1,
@@ -1450,7 +1452,7 @@
     "Cato",
     "Eli"
    ],
-   "steps": 185,
+   "steps": 182,
    "team_achievements": [
     "collect_drink",
     "collect_sapling",
@@ -1464,9 +1466,9 @@
     3
    ],
    "lifetimes": [
-    185,
-    185,
-    185
+    182,
+    182,
+    182
    ],
    "stats": {
     "dropped": 2,
@@ -1518,7 +1520,7 @@
     "Cato",
     "Vera"
    ],
-   "steps": 191,
+   "steps": 189,
    "team_achievements": [
     "collect_wood",
     "wake_up"
@@ -1530,8 +1532,8 @@
    ],
    "lifetimes": [
     172,
-    191,
-    191
+    189,
+    189
    ],
    "stats": {
     "dropped": 1,
@@ -1550,7 +1552,7 @@
     "Eli",
     "Wren"
    ],
-   "steps": 175,
+   "steps": 168,
    "team_achievements": [
     "collect_sapling",
     "place_plant",
@@ -1562,9 +1564,9 @@
     1
    ],
    "lifetimes": [
-    175,
-    175,
-    175
+    168,
+    168,
+    168
    ],
    "stats": {
     "dropped": 1,
@@ -1583,24 +1585,26 @@
     "Xavi",
     "Zeke"
    ],
-   "steps": 179,
+   "steps": 243,
    "team_achievements": [
+    "collect_sapling",
     "collect_wood",
+    "place_plant",
     "wake_up"
    ],
    "individual": [
-    1,
+    3,
     1,
     2
    ],
    "lifetimes": [
-    179,
-    179,
-    179
+    243,
+    233,
+    207
    ],
    "stats": {
-    "dropped": 0,
-    "picked_up": 0,
+    "dropped": 1,
+    "picked_up": 1,
     "revives": 0,
     "times_downed": 3,
     "shared_drinks": 0,
@@ -1615,7 +1619,7 @@
     "Cleo",
     "Ines"
    ],
-   "steps": 163,
+   "steps": 160,
    "team_achievements": [
     "collect_drink",
     "wake_up"
@@ -1626,9 +1630,9 @@
     1
    ],
    "lifetimes": [
-    163,
-    163,
-    163
+    160,
+    160,
+    160
    ],
    "stats": {
     "dropped": 0,
@@ -1647,7 +1651,7 @@
     "Xavi",
     "Faye"
    ],
-   "steps": 187,
+   "steps": 154,
    "team_achievements": [
     "collect_sapling",
     "collect_wood",
@@ -1655,14 +1659,14 @@
     "wake_up"
    ],
    "individual": [
-    3,
-    2,
+    0,
+    4,
     2
    ],
    "lifetimes": [
-    187,
-    187,
-    187
+    122,
+    154,
+    154
    ],
    "stats": {
     "dropped": 4,
@@ -1681,7 +1685,7 @@
     "Nora",
     "Ada"
    ],
-   "steps": 176,
+   "steps": 170,
    "team_achievements": [
     "collect_wood",
     "wake_up"
@@ -1692,9 +1696,9 @@
     1
    ],
    "lifetimes": [
-    176,
-    176,
-    176
+    170,
+    170,
+    170
    ],
    "stats": {
     "dropped": 1,
@@ -1713,7 +1717,7 @@
     "Suki",
     "Zeke"
    ],
-   "steps": 190,
+   "steps": 180,
    "team_achievements": [
     "wake_up"
    ],
@@ -1723,9 +1727,9 @@
     1
    ],
    "lifetimes": [
-    190,
-    182,
-    190
+    180,
+    180,
+    180
    ],
    "stats": {
     "dropped": 0,
