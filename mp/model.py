@@ -51,7 +51,14 @@ class TeamPolicy(nn.Module):
         self.mem_norm = nn.LayerNorm(d)
         self.init_h = nn.Linear(d, dec_dim)
         self.inp = nn.Linear(d, dec_dim)
-        self.query = nn.Linear(dec_dim, d)
+        self.query = nn.Linear(dec_dim, d)                      # single-head reader of decoders saved before `attn` existed
+        # how the decoder reads the state: 8 heads with their own key/value projections. The first decoder
+        # had one un-projected head and learned fluent sentences about the wrong compass direction --
+        # it could not pick "3 west 1 north" out of a thousand tokens.
+        self.heads = 8
+        self.attn_q, self.attn_k, self.attn_v = nn.Linear(dec_dim, dec_dim), nn.Linear(d, dec_dim), nn.Linear(d, dec_dim)
+        self.attn_out = nn.Linear(dec_dim, d)
+        self.single_head = False
         self.gru = nn.GRUCell(dec_dim + d, dec_dim)
         self.out = nn.Sequential(nn.Linear(dec_dim + d, d), nn.GELU(), nn.LayerNorm(d))
         self.word_bias = nn.Parameter(torch.zeros(len(WORDS)))
@@ -104,28 +111,47 @@ class TeamPolicy(nn.Module):
         valid = torch.cat([torch.ones(name_tok.size(0), len(WORDS), dtype=torch.bool, device=E.device), name_tok_mask.sum(2) > 0], 1)
         return table, valid
 
-    def _step(self, prev_emb, state, h, pad, table, valid):
-        q = self.query(state)
-        att = torch.einsum("bd,bld->bl", q, h.to(q.dtype)) / h.size(-1) ** 0.5
-        ctx = torch.einsum("bl,bld->bd", att.masked_fill(pad, -1e4).softmax(-1), h.to(q.dtype))
+    def _memory(self, h, pad, rows=None):
+        """What the decoder reads at every step, prepared once per sentence. rows: repeat states (several
+        sentences about the same state) without repeating the work."""
+        if self.single_head:
+            mem = (h, pad)
+        else:
+            split = lambda x: x.view(x.size(0), x.size(1), self.heads, -1).transpose(1, 2)      # [B, heads, L, hd]
+            mem = (split(self.attn_k(h)), split(self.attn_v(h)), pad)
+        return mem if rows is None else tuple(m[rows] for m in mem)
+
+    def _step(self, prev_emb, state, mem, table, valid):
+        if self.single_head:
+            h, pad = mem
+            q = self.query(state)
+            att = torch.einsum("bd,bld->bl", q, h.to(q.dtype)) / h.size(-1) ** 0.5
+            ctx = torch.einsum("bl,bld->bd", att.masked_fill(pad, -1e4).softmax(-1), h.to(q.dtype))
+        else:
+            k, v, pad = mem
+            q = self.attn_q(state).view(state.size(0), self.heads, 1, -1)
+            ctx = F.scaled_dot_product_attention(q, k, v, attn_mask=~pad[:, None, None, :])
+            ctx = self.attn_out(ctx.reshape(state.size(0), -1))
         state = self.gru(torch.cat([self.inp(prev_emb), ctx], -1), state)
         z = self.out(torch.cat([state, ctx], -1))
         logits = self.log_scale.exp().clamp(max=100.0) * torch.einsum("bd,bvd->bv", F.normalize(z, dim=-1), F.normalize(table.to(z.dtype), dim=-1))
         logits = logits + F.pad(self.word_bias, (0, table.size(1) - len(WORDS)))
         return logits.float().masked_fill(~valid, -1e4), state
 
-    def speech_logits(self, h, attention_mask, name_tok, name_tok_mask, targets):
-        """Teacher-forced. targets [B, T] are indices into (WORDS + names), ending in 0 = <end>. -> [B, T, V+N]"""
+    def speech_logits(self, h, attention_mask, name_tok, name_tok_mask, targets, rows=None):
+        """Teacher-forced. targets [B, T] are indices into (WORDS + names), ending in 0 = <end>. -> [B, T, V+N]
+        rows [B]: which state each sentence is about, when h holds each state once."""
         table, valid = self.vocabulary(name_tok, name_tok_mask)
-        pad = ~attention_mask.bool()
         h = self.mem_norm(h.float())
-        state = torch.tanh(self.init_h(h[:, 0]))
-        prev = self.start_emb[None].expand(h.size(0), -1).float()
+        mem = self._memory(h, ~attention_mask.bool(), rows)
+        start = h[:, 0] if rows is None else h[rows, 0]
+        state = torch.tanh(self.init_h(start))
+        prev = self.start_emb[None].expand(start.size(0), -1).float()
         out = []
         for t in range(targets.size(1)):
-            logits, state = self._step(prev, state, h.float(), pad, table.float(), valid)
+            logits, state = self._step(prev, state, mem, table.float(), valid)
             out.append(logits)
-            prev = table.float()[torch.arange(h.size(0)), targets[:, t].clamp(min=0)]
+            prev = table.float()[torch.arange(start.size(0)), targets[:, t].clamp(min=0)]
         return torch.stack(out, 1)
 
     def sentence_logp(self, h, attention_mask, name_tok, name_tok_mask, tokens):
@@ -140,16 +166,16 @@ class TeamPolicy(nn.Module):
         """-> list of word-index lists (without <end>), and the summed log-probability of each sentence.
         With return_tokens, also the exact token lists drawn (with <end>), which sentence_logp can re-score."""
         table, valid = self.vocabulary(name_tok, name_tok_mask)
-        pad = ~attention_mask.bool()
         b = h.size(0)
         h = self.mem_norm(h.float())
+        mem = self._memory(h, ~attention_mask.bool())
         state = torch.tanh(self.init_h(h[:, 0]))
         prev = self.start_emb[None].expand(b, -1).float()
         alive = torch.ones(b, dtype=torch.bool, device=h.device)
         words, logp = [[] for _ in range(b)], torch.zeros(b, device=h.device)
         drawn = [[] for _ in range(b)]
         for _ in range(MAX_WORDS + 1):
-            logits, state = self._step(prev, state, h.float(), pad, table.float(), valid)
+            logits, state = self._step(prev, state, mem, table.float(), valid)
             dist = torch.distributions.Categorical(logits=logits / temperature)
             w = dist.sample() if sample else logits.argmax(-1)
             logp = logp + dist.log_prob(w) * alive
@@ -191,8 +217,7 @@ class TeamPolicy(nn.Module):
     def save(self, out, cfg, extra=None):
         os.makedirs(out, exist_ok=True)
         save_file({k: v.half().contiguous().cpu() for k, v in self.core.state_dict().items()}, os.path.join(out, "model.safetensors"))
-        speech = {k: v.detach().cpu().contiguous() for k, v in self.state_dict().items() if not k.startswith("core.")}
-        save_file(speech, os.path.join(out, "speech.safetensors"))
+        self.save_speech(out)
         self.core.encoder.config.save_pretrained(os.path.join(out, "encoder"))
         self.tok.save_pretrained(os.path.join(out, "tokenizer"))
         cfg = dict(cfg, fine_tuned=True, model_name="laya-team-player", words=WORDS, temperature=[1.0, 1.0, 1.0],
@@ -200,12 +225,19 @@ class TeamPolicy(nn.Module):
         with open(os.path.join(out, "rl_agent_config.json"), "w") as f:
             json.dump(cfg, f, indent=2)
 
+    def save_speech(self, out):
+        """Everything that is not Laya's own network: the speech decoder and the value heads."""
+        unused = "attn" if self.single_head else "query."      # load_speech tells the two readers apart by which is saved
+        speech = {k: v.detach().cpu().contiguous() for k, v in self.state_dict().items() if not k.startswith(("core.", unused))}
+        save_file(speech, os.path.join(out, "speech.safetensors"))
+
     def load_speech(self, path):
         f = os.path.join(path, "speech.safetensors")
         if os.path.exists(f):
             sd = load_file(f)
             if "scale" in sd:                                   # checkpoints written before log_scale existed
                 sd["log_scale"] = sd.pop("scale").clamp(min=1.0).log()
+            self.single_head = not any(k.startswith("attn") for k in sd)
             if sd["word_bias"].numel() < len(WORDS):            # saved before the newest words existed
                 sd["word_bias"] = F.pad(sd["word_bias"], (0, len(WORDS) - sd["word_bias"].numel()))
             self.load_state_dict(sd, strict=False)
