@@ -52,7 +52,38 @@ def training():
         runs.append({"name": os.path.basename(path)[len("logs_train_"):-4], "age_s": round(age), "total": total, "min_left": left,
                      "speed": speed, "points": points, "val": vals,
                      "mode": "%s (%sM trainable parameters)" % (mode.group(1), mode.group(2)) if mode else ""})
-    return {"runs": runs}
+    return {"runs": runs, "pipeline": pipeline_status()}
+
+
+STAGES = {"mp.run_baselines": ("Scoring the baseline teams", "logs_baselines.txt"),
+          "mp.collect": ("Recording warm-start data from the scripted team", "logs_collect.txt"),
+          "mp.train_bc": ("Training Laya", "logs_train_team_bc.txt"),
+          "mp.evaluate": ("Evaluating the trained team on held-out worlds", "logs_eval_trained.txt")}
+
+
+def pipeline_status():
+    """What `python -m mp.run_pipeline` is doing right now, or None if it is not running."""
+    path = os.path.join(ROOT, "logs_pipeline.txt")
+    try:
+        lines = [l.strip() for l in open(path, encoding="utf-8", errors="replace") if l.strip()]
+    except OSError:
+        return None
+    if not lines or lines[-1].startswith("pipeline finished"):
+        return None
+    current = next((l for l in reversed(lines) if l.startswith(">>")), None)
+    if current is None:
+        return None
+    module = current.split()[1]
+    title, log = STAGES.get(module, (module, None))
+    detail, age = "", time.time() - os.path.getmtime(path)
+    if log and os.path.exists(os.path.join(ROOT, log)):
+        age = min(age, time.time() - os.path.getmtime(os.path.join(ROOT, log)))
+        tail = [l.strip() for l in open(os.path.join(ROOT, log), encoding="utf-8", errors="replace") if l.strip()]
+        detail = next((l for l in reversed(tail) if not l.startswith(("Fetching", "Loading", "Warning"))), "")[:160]
+    if age > 600:
+        return None                                     # nothing has been written for 10 minutes: not running
+    done = [STAGES[l.split()[1]][0] for l in lines if l.startswith(">>") and l.split()[1] in STAGES][:-1]
+    return {"stage": title, "detail": detail, "done": done, "step": len(done) + 1, "of": len(STAGES)}
 
 
 def new_game(body):

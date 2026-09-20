@@ -323,7 +323,9 @@ function lineChart(series, { yMax, fmt }) {
   hit.onmouseleave = () => { cross.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }; return svg; }
 async function pollTraining() {
   let t; try { t = await fetch('/api/training').then(r => r.json()); } catch (e) { return; }
-  const card = $('trainCard'); card.classList.toggle('hidden', !t.runs.length); card.className = t.runs.length ? 'card' : 'hidden'; card.innerHTML = '';
+  const card = $('trainCard'), pl = t.pipeline; card.className = (t.runs.length || pl) ? 'card' : 'hidden'; card.innerHTML = '';
+  if (pl && !t.runs.length) card.append(el('h2', {}, el('span', { class:'dot' }), `Pipeline — step ${pl.step} of ${pl.of}: ${pl.stage} `, el('small', { text:'training curves appear here when the training step starts' })),
+    el('p', { class:'note', style:'margin:0', text: pl.detail || 'starting…' }));
   const css = getComputedStyle(document.documentElement), c1 = css.getPropertyValue('--s1').trim(), c2 = css.getPropertyValue('--s2').trim(), c3 = css.getPropertyValue('--s3').trim();
   t.runs.forEach(r => { const last = r.points[r.points.length - 1], pct = last && r.total ? last.step / r.total * 100 : 0;
     card.append(el('h2', {}, el('span', { class:'dot' }), `Training: ${r.name} `, el('small', { text:r.mode })),
