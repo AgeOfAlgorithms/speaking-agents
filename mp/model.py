@@ -46,6 +46,9 @@ class TeamPolicy(nn.Module):
         self.register_buffer("word_tok_mask", torch.tensor([[1.0] * len(i) + [0.0] * (width - len(i)) for i in ids]), persistent=False)
         self.end_emb = nn.Parameter(torch.randn(d) * 0.02)      # <end> and <start> are not English words
         self.start_emb = nn.Parameter(torch.randn(d) * 0.02)
+        # the encoder's hidden states are large and un-normalised; read raw, they saturate the decoder's
+        # attention and its tanh start state (the same trouble the value head had)
+        self.mem_norm = nn.LayerNorm(d)
         self.init_h = nn.Linear(d, dec_dim)
         self.inp = nn.Linear(d, dec_dim)
         self.query = nn.Linear(dec_dim, d)
@@ -105,7 +108,8 @@ class TeamPolicy(nn.Module):
         """Teacher-forced. targets [B, T] are indices into (WORDS + names), ending in 0 = <end>. -> [B, T, V+N]"""
         table, valid = self.vocabulary(name_tok, name_tok_mask)
         pad = ~attention_mask.bool()
-        state = torch.tanh(self.init_h(h[:, 0].float()))
+        h = self.mem_norm(h.float())
+        state = torch.tanh(self.init_h(h[:, 0]))
         prev = self.start_emb[None].expand(h.size(0), -1).float()
         out = []
         for t in range(targets.size(1)):
@@ -128,7 +132,8 @@ class TeamPolicy(nn.Module):
         table, valid = self.vocabulary(name_tok, name_tok_mask)
         pad = ~attention_mask.bool()
         b = h.size(0)
-        state = torch.tanh(self.init_h(h[:, 0].float()))
+        h = self.mem_norm(h.float())
+        state = torch.tanh(self.init_h(h[:, 0]))
         prev = self.start_emb[None].expand(b, -1).float()
         alive = torch.ones(b, dtype=torch.bool, device=h.device)
         words, logp = [[] for _ in range(b)], torch.zeros(b, device=h.device)

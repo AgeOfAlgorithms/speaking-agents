@@ -178,7 +178,7 @@ def main():
     speech = [p for k, p in policy.named_parameters() if not k.startswith("core.") and k not in SLOW_TO_MOVE]
     slow = [p for k, p in policy.named_parameters() if k in SLOW_TO_MOVE]
     groups = [{"params": head, "lr": args.lr_head}, {"params": speech, "lr": args.lr_speech},
-              {"params": slow, "lr": 0.02, "weight_decay": 0.0}]
+              {"params": slow, "lr": 5e-3, "weight_decay": 0.0}]
     if enc:
         groups.append({"params": enc, "lr": args.lr_encoder})
     opt = torch.optim.AdamW(groups, weight_decay=0.01)

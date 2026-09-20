@@ -21,7 +21,7 @@ from mp import prompts
 from mp.model import SLOW_TO_MOVE, TeamPolicy
 
 
-def tune(policy, agent, rows, val_rows, epochs=25, bs=16, lr=1e-3, max_len=1280, head_max_len=640, log=print):
+def tune(policy, agent, rows, val_rows, epochs=25, bs=16, lr=5e-4, slow_lr=5e-3, max_len=1280, head_max_len=640, log=print):
     from laya.common import build_sequence
     tok, dev = agent.tok, agent.device
 
@@ -87,9 +87,9 @@ def tune(policy, agent, rows, val_rows, epochs=25, bs=16, lr=1e-3, max_len=1280,
     for p in params:
         p.requires_grad_(True)
     opt = torch.optim.AdamW([{"params": [p for k, p in named if k not in SLOW_TO_MOVE], "lr": lr},
-                             {"params": [p for k, p in named if k in SLOW_TO_MOVE], "lr": 0.02}], weight_decay=0.0)
+                             {"params": [p for k, p in named if k in SLOW_TO_MOVE], "lr": slow_lr}], weight_decay=0.0)
     steps = epochs * int(np.ceil(len(train) / bs))
-    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=[lr, 0.02], total_steps=steps)
+    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=[lr, slow_lr], total_steps=steps, pct_start=0.1)
     w0, s0 = score(val)
     log("speech tuning: %d spoken samples, %d held out | before: words %.3f, whole sentences %.3f" % (len(train), len(val), w0, s0))
     rng, t0 = np.random.RandomState(0), time.time()
@@ -126,6 +126,7 @@ def main():
     ap.add_argument("--data", default="data/warmstart")
     ap.add_argument("--epochs", type=int, default=25)
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--fresh", action="store_true", help="start the decoder from scratch instead of from the saved one")
     ap.add_argument("--limit", type=int, default=0, help="use only this many spoken samples (quick test)")
     args = ap.parse_args()
     import laya
@@ -133,7 +134,7 @@ def main():
     path = args.model if os.path.isabs(args.model) else os.path.join(root, args.model)
     agent = laya.load(path, device=args.device)
     policy = TeamPolicy(agent.model, agent.tok).to(agent.device)
-    assert policy.load_speech(path)
+    assert args.fresh or policy.load_speech(path)
     train, val = speech_rows(args.data)
     if args.limit:
         train, val = train[:args.limit], val[:max(8, args.limit // 4)]
