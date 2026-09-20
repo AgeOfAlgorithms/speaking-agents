@@ -145,7 +145,7 @@ def main():
     def losses(b):
         ids, att, mpos, mmask, y, w, spk, tgt, ntok, nmask = b
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            logits, h = policy.encode(ids, att, mpos, mmask)
+            logits, h, memory = policy.encode(ids, att, mpos, mmask)
         # label smoothing over the options that were actually offered (never onto the padding slots)
         k = mmask.sum(-1, keepdim=True).clamp(min=2).float()
         target = (mmask.float() * (0.05 / (k - 1))).scatter(1, y[:, None], 0.95)
@@ -153,7 +153,7 @@ def main():
         act_loss = (-(target * logp).sum(-1) * w).sum() / w.sum()
         sp_loss, sp_logits = logits.new_zeros(()), None
         if spk:
-            sp_logits = policy.speech_logits(h[spk], att[spk], ntok, nmask, tgt)
+            sp_logits = policy.speech_logits(memory[spk], att[spk], ntok, nmask, tgt)
             sp_loss = F.cross_entropy(sp_logits.reshape(-1, sp_logits.size(-1)), tgt.reshape(-1), ignore_index=-100)
         return act_loss, sp_loss, logits, sp_logits
 

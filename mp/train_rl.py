@@ -158,11 +158,11 @@ def main():
                 chunk, locs = rows[c:c + 48], where[c:c + 48]
                 ids, att, mpos, mmask = collate(chunk)
                 with torch.no_grad(), torch.autocast(**amp):
-                    logits, h = policy.encode(ids, att, mpos, mmask)
+                    logits, h, memory = policy.encode(ids, att, mpos, mmask)
                     step_own.append(policy.value(h))
                     step_cls.append(h[:, 0].float())
                     if ref is not None:
-                        rlogits, rh = ref.encode(ids, att, mpos, mmask)
+                        rlogits, _, rmemory = ref.encode(ids, att, mpos, mmask)
                         ref_logp = torch.log_softmax(rlogits.float(), -1).cpu()
                 dist = torch.distributions.Categorical(logits=logits)
                 choice = dist.sample()
@@ -171,13 +171,13 @@ def main():
                 tokens, ref_speech = {}, {}
                 if speakers:
                     ntok, nmask = policy.name_tokens([chunk[k]["names"] for k in speakers], dev)
-                    words, slogp, drawn = policy.speak(h[speakers], att[speakers], ntok, nmask, sample=True, return_tokens=True)
+                    words, slogp, drawn = policy.speak(memory[speakers], att[speakers], ntok, nmask, sample=True, return_tokens=True)
                     if ref is not None:                     # what the warm start would have said, word by word
                         tk = torch.zeros((len(speakers), max(len(d) for d in drawn)), dtype=torch.long, device=dev)
                         for j, d in enumerate(drawn):
                             tk[j, :len(d)] = torch.tensor(d)
                         with torch.no_grad():
-                            ref_words = torch.log_softmax(ref.speech_logits(rh[speakers], att[speakers], ntok, nmask, tk), -1).cpu()
+                            ref_words = torch.log_softmax(ref.speech_logits(rmemory[speakers], att[speakers], ntok, nmask, tk), -1).cpu()
                     for j, k in enumerate(speakers):
                         tokens[k] = drawn[j]
                         if ref is not None:
@@ -266,7 +266,7 @@ def main():
             batch = [buf[j] for j in idx]
             ids, att, mpos, mmask = collate(batch)
             with torch.autocast(**amp):
-                logits, h = policy.encode(ids, att, mpos, mmask)
+                logits, h, memory = policy.encode(ids, att, mpos, mmask)
             dist = torch.distributions.Categorical(logits=logits)
             choice = torch.tensor([t["choice"] for t in batch], device=dev)
             logp = dist.log_prob(choice)
@@ -285,7 +285,7 @@ def main():
                     tk[r, :len(batch[k]["tokens"])] = torch.tensor(batch[k]["tokens"])
                 ntok, nmask = policy.name_tokens([batch[k]["names"] for k in spk], dev)
                 said = tk != -100
-                words = torch.log_softmax(policy.speech_logits(h[spk], att[spk], ntok, nmask, tk.clamp(min=0)), -1)
+                words = torch.log_softmax(policy.speech_logits(memory[spk], att[spk], ntok, nmask, tk.clamp(min=0)), -1)
                 extra = (words.gather(-1, tk.clamp(min=0)[..., None]).squeeze(-1) * said).sum(-1)
                 where_spk = torch.tensor(spk, device=dev)
                 logp = logp.index_add(0, where_spk, extra)

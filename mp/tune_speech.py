@@ -47,10 +47,7 @@ def tune(policy, agent, rows, val_rows, epochs=25, bs=16, lr=5e-4, slow_lr=5e-3,
                 att[r, :len(seq)] = 1
             ids, att = ids.to(dev), att.to(dev)
             with torch.no_grad(), torch.autocast(device_type=dev.type, dtype=torch.bfloat16, enabled=dev.type == "cuda"):
-                h = policy.core.encoder(input_ids=ids, attention_mask=att).last_hidden_state
-                h = h + policy.core.type_emb(torch.zeros(len(part), dtype=torch.long, device=dev))[:, None, :]
-                for layer in policy.core.head.layers:
-                    h = layer(h, src_key_padding_mask=~att.bool())
+                h = policy.hidden(ids, att)[1]                  # the states the decoder reads
             out += [(h[r, :len(seq)].half().cpu(), words, names) for r, (seq, words, names) in enumerate(part)]
         return out
 

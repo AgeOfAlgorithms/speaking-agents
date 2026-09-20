@@ -45,8 +45,9 @@ def main():
     ap.add_argument("--mix-described", type=int, default=1500)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--passes", type=int, default=2)
-    ap.add_argument("--memory-layer", type=int, default=None, help="PROBE: let the decoder read encoder layer N (0 = embeddings) instead "
-                    "of the final states after Laya's head. Nothing is saved; use with --probe-steps")
+    ap.add_argument("--memory-layer", type=int, default=None, help="encoder layer the decoder reads (default: mp.model.MEMORY_LAYER; "
+                    "0 = the final states after Laya's head)")
+    ap.add_argument("--val-states", type=int, default=400)
     ap.add_argument("--probe-steps", type=int, default=0, help="stop after this many steps, skip the mixed phase, save nothing")
     ap.add_argument("--gpu-share", type=float, default=0.16, help="this job is small; leave the card to whatever else is training")
     args = ap.parse_args()
@@ -64,6 +65,8 @@ def main():
     max_len, head_max_len = cfg.get("max_len", 1280), cfg.get("head_max_len", 640)
     policy = TeamPolicy(agent.model, tok).to(dev)               # a fresh decoder
     policy.eval()
+    if args.memory_layer is not None:
+        policy.memory_layer = args.memory_layer
     if dev.type == "cuda":
         policy.core.encoder.to(torch.bfloat16)                  # only read here; halves this job's share of the card
     amp = dict(device_type=dev.type, dtype=torch.bfloat16, enabled=dev.type == "cuda")
@@ -72,7 +75,7 @@ def main():
     held_out = range(57000, 60000)                              # the same games every other script holds out
     pool = [i for i in range(len(rows)) if i not in held_out]
     random.shuffle(pool)
-    train_ids, val_ids = pool[:args.states], random.sample(list(held_out), 400)
+    train_ids, val_ids = pool[:args.states], random.sample(list(held_out), args.val_states)
     spoken = [(i, r) for i, r in enumerate(rows) if r["words"]]
 
     def encode(batch_rows):
@@ -86,13 +89,7 @@ def main():
             att[k, :len(s)] = 1
         ids, att = ids.to(dev), att.to(dev)
         with torch.no_grad(), torch.autocast(**amp):
-            if args.memory_layer is not None:
-                return policy.core.encoder(input_ids=ids, attention_mask=att, output_hidden_states=True).hidden_states[args.memory_layer].float(), att
-            h = policy.core.encoder(input_ids=ids, attention_mask=att).last_hidden_state
-            h = h + policy.core.type_emb(torch.zeros(len(seqs), dtype=torch.long, device=dev))[:, None, :]
-            for layer in policy.core.head.layers:
-                h = layer(h, src_key_padding_mask=~att.bool())
-        return h.float(), att
+            return policy.hidden(ids, att)[1].float(), att
 
     def targets(r, k):
         """k true sentences for this state, drawn family-first so rare kinds (danger, teammates) get their share."""

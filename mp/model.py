@@ -32,6 +32,7 @@ WORDS = ["<end>"] + sorted({w for s in language.SLOTS for phrase in language.VOC
 assert len(set(WORDS)) == len(WORDS)
 WORD_ID = {w: i for i, w in enumerate(WORDS)}
 MAX_NAMES = 6
+MEMORY_LAYER = 16     # which of the encoder's 28 layers the speech decoder reads (see TeamPolicy.hidden)
 SLOW_TO_MOVE = ("log_scale", "word_bias")     # scalars/biases that need a much larger learning rate than the weights
 
 
@@ -55,6 +56,12 @@ class TeamPolicy(nn.Module):
         # how the decoder reads the state: 8 heads with their own key/value projections. The first decoder
         # had one un-projected head and learned fluent sentences about the wrong compass direction --
         # it could not pick "3 west 1 north" out of a thousand tokens.
+        # WHICH states the decoder reads. Fine-tuning for action choice leaves the encoder's last layers
+        # holding what the option scorer needs and little else: a decoder reading them said fluent things
+        # that were true of the state 40% of the time; reading layer 16 (where "3 west 1 north" is still
+        # legible), 76% after a quarter of the training. 0 = the final states (decoders saved before this).
+        self.memory_layer = MEMORY_LAYER
+        self.register_buffer("memory_layer_saved", torch.tensor(MEMORY_LAYER))
         self.heads = 8
         self.attn_q, self.attn_k, self.attn_v = nn.Linear(dec_dim, dec_dim), nn.Linear(d, dec_dim), nn.Linear(d, dec_dim)
         self.attn_out = nn.Linear(dec_dim, d)
@@ -85,16 +92,29 @@ class TeamPolicy(nn.Module):
         return self.value_team(torch.cat([own, team.float()], -1)).squeeze(-1)
 
     # -- shared encoder pass ---------------------------------------------------------------------
-    def encode(self, input_ids, attention_mask, marker_pos, marker_mask):
-        core = self.core
-        h = core.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
+    def hidden(self, input_ids, attention_mask):
+        """-> (h, memory): the final states (option scores, value) and the states the speech decoder reads."""
+        core, grabbed, hook = self.core, [], None
+        if self.memory_layer > 0:                           # hidden_states[n] of the encoder = what layer n-1 puts out
+            hook = core.encoder.layers[self.memory_layer - 1].register_forward_hook(
+                lambda mod, args, out: grabbed.append(out[0] if isinstance(out, tuple) else out))
+        try:
+            h = core.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
+        finally:
+            if hook is not None:
+                hook.remove()
         h = h + core.type_emb(torch.zeros(h.size(0), dtype=torch.long, device=h.device))[:, None, :]
         pad = ~attention_mask.bool()
         for layer in core.head.layers:
             h = layer(h, src_key_padding_mask=pad)
+        return h, (grabbed[0] if grabbed else h)
+
+    def encode(self, input_ids, attention_mask, marker_pos, marker_mask):
+        """-> option scores, final states (for the value heads), memory (for speech_logits / speak)."""
+        h, memory = self.hidden(input_ids, attention_mask)
         m = torch.gather(h, 1, marker_pos.clamp(min=0)[:, :, None].expand(-1, -1, h.size(-1)))
-        logits = core.scorer(m).squeeze(-1).float().masked_fill(~marker_mask, -1e4)
-        return logits, h
+        logits = self.core.scorer(m).squeeze(-1).float().masked_fill(~marker_mask, -1e4)
+        return logits, h, memory
 
     # -- vocabulary: fixed words + this game's names -------------------------------------------------
     def _embed_table(self):
@@ -227,6 +247,7 @@ class TeamPolicy(nn.Module):
 
     def save_speech(self, out):
         """Everything that is not Laya's own network: the speech decoder and the value heads."""
+        self.memory_layer_saved.fill_(self.memory_layer)
         unused = "attn" if self.single_head else "query."      # load_speech tells the two readers apart by which is saved
         speech = {k: v.detach().cpu().contiguous() for k, v in self.state_dict().items() if not k.startswith(("core.", unused))}
         save_file(speech, os.path.join(out, "speech.safetensors"))
@@ -238,6 +259,7 @@ class TeamPolicy(nn.Module):
             if "scale" in sd:                                   # checkpoints written before log_scale existed
                 sd["log_scale"] = sd.pop("scale").clamp(min=1.0).log()
             self.single_head = not any(k.startswith("attn") for k in sd)
+            self.memory_layer = int(sd["memory_layer_saved"]) if "memory_layer_saved" in sd else 0
             if sd["word_bias"].numel() < len(WORDS):            # saved before the newest words existed
                 sd["word_bias"] = F.pad(sd["word_bias"], (0, len(WORDS) - sd["word_bias"].numel()))
             self.load_state_dict(sd, strict=False)

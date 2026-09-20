@@ -36,9 +36,14 @@ while "overnight queue finished" not in open("logs_overnight.txt", encoding="utf
 # the von-encoder warm start ran out of GPU memory in the overnight queue; train_bc now halves such batches
 run(["mp.train_bc", "--limit", "60000", "--encoder", "von", "--out", "models/team_bc_von", "--resume"], "logs_train_team_bc_von.txt",
     skip_if="models/team_bc_von/train_report.json")
-run(["mp.evaluate", "--team", "trained", "--model", "models/team_bc_von", "--games", "20", "--tag", "von_trained"], "logs_eval_von_trained.txt",
-    skip_if="results/von_trained.json")
-save("Results: von's encoder under Laya's head, warm-started the same way")
+# speak first, understand later: the decoders learn to say true things about recorded states (mp/pretrain_speech.py)
+# BEFORE any RL, so that RL only has to discover when speaking pays and what to do about what is heard
+for model, tag in (("models/team_bc", "laya_trained_grounded_speech"), ("models/team_bc_von", "von_trained")):
+    run(["mp.pretrain_speech", "--model", model], "logs_pretrain_speech_%s.txt" % os.path.basename(model),
+        skip_if=model + "/speech_report.json")
+    run(["mp.evaluate", "--team", "trained", "--model", model, "--games", "20", "--tag", tag], "logs_eval_%s.txt" % tag,
+        skip_if="results/%s.json" % tag)
+    save("Results: %s with a speech decoder pretrained to describe what it sees" % model)
 
 run(["mp.train_rl", "--model", "models/team_bc", "--out", "models/team_rl", "--iters", iters, "--resume"], "logs_train_rl.txt",
     skip_if="models/team_rl/train_report.json")

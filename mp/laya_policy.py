@@ -191,7 +191,7 @@ class TrainedMP(LayaMP):
             b = self._collate([items], self.tok.pad_token_id)
             ids, att = b["input_ids"].to(self.dev), b["attention_mask"].to(self.dev)
             with torch.autocast(device_type=self.dev.type, dtype=torch.bfloat16, enabled=self.dev.type == "cuda"):
-                logits, h = self.policy.encode(ids, att, b["marker_pos"].to(self.dev), b["marker_mask"].to(self.dev))
+                logits, _, memory = self.policy.encode(ids, att, b["marker_pos"].to(self.dev), b["marker_mask"].to(self.dev))
             probs = torch.softmax(logits / self.temperature, -1).cpu().numpy()
             speakers = []
             for r, i in enumerate(idx):
@@ -209,7 +209,7 @@ class TrainedMP(LayaMP):
                 rows = [r for r, _, _ in speakers]
                 names = [[percepts[i]["name"]] + percepts[i]["teammates"] for _, i, _ in speakers]
                 ntok, nmask = self.policy.name_tokens(names, self.dev)
-                words, _ = self.policy.speak(h[rows], att[rows], ntok, nmask, sample=self.sample)
+                words, _ = self.policy.speak(memory[rows], att[rows], ntok, nmask, sample=self.sample)
                 for (r, i, info), w, nm in zip(speakers, words, names):
                     text = self.policy.render(w, nm)
                     info["said"] = text
