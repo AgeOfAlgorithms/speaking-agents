@@ -1,4 +1,4 @@
-"""After the RL queue: the von-encoder comparison, which twice ran out of GPU memory at the usual batch size.
+"""After the local-reward RL pair: the von-encoder comparison, which twice ran out of GPU memory at the usual batch size.
 Same effective batch (4 x 8 instead of 8 x 4), half the activation memory. Resumable.
 
     python -m mp.run_von_queue
@@ -21,7 +21,7 @@ def run(args, log, skip_if=None):
         subprocess.run(PY + args, stdout=f, stderr=subprocess.STDOUT, check=False)
 
 
-while "rl queue finished" not in open("logs_rl_queue.txt", encoding="utf-8").read():
+while "local reward queue finished" not in open("logs_local_reward_queue.txt", encoding="utf-8").read():
     time.sleep(60)
 run(["mp.train_bc", "--limit", "60000", "--encoder", "von", "--bs", "4", "--accum", "8", "--out", "models/team_bc_von", "--resume"],
     "logs_train_team_bc_von.txt", skip_if="models/team_bc_von/train_report.json")

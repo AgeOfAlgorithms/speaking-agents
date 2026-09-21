@@ -1,4 +1,4 @@
-"""After the von comparison: the same RL pair (speech on / speech off) under the LOCAL reward scheme
+"""The RL pair (speech on / speech off) under the LOCAL reward scheme
 (mp/train_rl.py --reward local: own health + the health of teammates in view, a small bonus per step
 standing and per step within earshot of a teammate). Resumable; commits and pushes after each run.
 
@@ -31,8 +31,6 @@ def save(message):
         print("   saved + pushed: %s" % message, flush=True)
 
 
-while "von queue finished" not in open("logs_von_queue.txt", encoding="utf-8").read():
-    time.sleep(60)
 for out, tag, extra in (("models/team_rl_local", "laya_rl_local", []), ("models/team_rl_local_mute", "laya_rl_local_mute", ["--no-speech"])):
     run(["mp.train_rl", "--model", "models/team_bc", "--out", out, "--iters", iters, "--reward", "local", "--resume"] + extra,
         "logs_train_%s.txt" % os.path.basename(out).replace("team_", ""), skip_if=out + "/train_report.json")
