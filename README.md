@@ -147,11 +147,39 @@ revives a game and the first shared drinks from a placed bucket. Caveats: 20 wor
 went in at the same time (a revive is now logged as one, and where a heard sentence came from is
 re-expressed from where the listener stands now), so this is not a clean single-change comparison.
 
+**Does speech help? (50 held-out worlds each.)** Reinforcement learning from the warm start: PPO, 60
+iterations (~230k decisions), top 8 encoder layers trainable, KL anchor to the warm start, centralised
+critic, "local" reward (+1 per new team achievement; own health and the health of teammates in view;
++0.01 per step standing; +0.002 per step with a teammate in earshot; -0.5 for going down). The same
+training was run with the channel removed, and the model from before RL was also evaluated muted.
+
+| team | team score | achievements / game | player lifetime | revives / game | times downed / game |
+|---|---|---|---|---|---|
+| before RL, speech on | 27.3 | 12.3 | 264 | 1.30 | 4.3 |
+| before RL, muted | 25.8 | 12.9 | 291 | 0.66 | 3.7 |
+| RL with speech | **28.8** | 13.3 | 294 | **1.72** | 4.7 |
+| RL without speech | 27.3 | 13.1 | 258 | 0.48 | 3.5 |
+
+What holds up: with a voice, downed players get revived two to three times as often, in both pairs.
+What is suggestive only: about +1.5 team score for speech and about +1.5 for RL, the same direction in
+both pairs but no bigger than the noise (the same model scored 30.5 on the first 20 of these worlds and
+27.3 on all 50). What does not hold up: longer lives from talking (it goes one way before RL and the
+other after). Talking teams also go down more often; a turn spent speaking is a turn not spent fighting
+or fleeing. And speech never died out under RL: the share of turns spent speaking rose from 4% to 8-10%.
+
+Why the score barely registers speech: Crafter's score counts WHICH achievements a team ever unlocks,
+and nearly all of them come in the first 250 steps; a teammate rescued at step 300 lives longer but
+rarely unlocks something new.
+
+**von vs Laya, trained the same way** (von's pretrained encoder under Laya's one-pass head, same data,
+same speech pretraining): held-out action agreement 81.1% vs 80.4%, team score 30.0 vs 30.5 (20 worlds),
+most-likely sentence true 91% vs 100%. The same within noise: both are ModernBERT-large underneath, and
+57k decisions of full fine-tuning erase whatever their different pretraining gave them. Zero-shot both
+play at random level, and von as shipped needs one forward pass per option.
+
 Honest reading of the scripted numbers: with a hand-written protocol, talking makes players live a
 little longer and lets them hand each other the makings of a stone campfire, but it does not move the
-team score. Whether a *learned* protocol does is the open question; reinforcement learning from the
-warm start (speech on vs off) is running: PPO with a KL anchor to the warm start (so speech does not
-die out before it pays) and a centralised critic. von's encoder under the same head follows.
+team score. The learned agents show the same thing (above): speech mostly buys rescues.
 
 ## Credits and licences
 
